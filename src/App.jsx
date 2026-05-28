@@ -432,18 +432,24 @@ function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFi
 }
 
 // ── RateModal ──────────────────────────────────────────────────
+function calcFinalScores(players, scores) {
+  const n = players.length;
+  const total = players.reduce((s, p) => s + scores[p.id], 0);
+  return players.map(p => ({
+    ...p,
+    finalScore: scores[p.id] * (n - 1) - (total - scores[p.id]),
+  }));
+}
+
 function RateModal({ players, scores, onClose }) {
   const [rate, setRate] = useState("");
 
   const rateNum = parseInt(rate.replace(/,/g, ""), 10) || 0;
 
-  // 平均点
-  const avg = players.reduce((s, p) => s + scores[p.id], 0) / players.length;
-
-  // 各プレイヤーの差分（プラスなら受け取り、マイナスなら支払い）
-  const diffs = players.map(p => ({
+  const finals = calcFinalScores(players, scores);
+  const diffs = finals.map(p => ({
     ...p,
-    diff: Math.round((scores[p.id] - avg) * rateNum),
+    diff: p.finalScore * rateNum,
   }));
 
   return (
@@ -485,7 +491,7 @@ function RateModal({ players, scores, onClose }) {
         {rateNum > 0 && (
           <div style={{ marginTop: "16px" }}>
             <div style={{ fontSize: "11px", color: "rgba(240,230,211,0.4)", marginBottom: "10px", letterSpacing: "0.1em" }}>
-              精算（平均との差分）
+              精算金額
             </div>
             {diffs.sort((a, b) => b.diff - a.diff).map(p => (
               <div key={p.id} style={{
@@ -590,6 +596,30 @@ function ResultView({ players, holeResults, onEdit, onNewGame }) {
             </table>
           </div>
         </details>
+
+        {/* 精算点 */}
+        <div style={{ marginTop: "20px" }}>
+          <div style={{ fontSize: "11px", color: "rgba(240,230,211,0.4)", marginBottom: "10px", letterSpacing: "0.1em" }}>
+            精算点（本人pt × 他人人数 − 他人pt合計）
+          </div>
+          {calcFinalScores(players, scores)
+            .sort((a, b) => b.finalScore - a.finalScore)
+            .map(p => (
+              <div key={p.id} style={{
+                ...styles.payRow,
+                background: p.finalScore > 0 ? "rgba(80,200,120,0.1)" : p.finalScore < 0 ? "rgba(220,80,80,0.1)" : "rgba(255,255,255,0.04)",
+              }}>
+                <span style={{ fontSize: "14px" }}>{p.name}</span>
+                <span style={{
+                  fontWeight: "bold",
+                  fontSize: "16px",
+                  color: p.finalScore > 0 ? "#50C878" : p.finalScore < 0 ? "#ff8a8a" : "rgba(240,230,211,0.4)",
+                }}>
+                  {p.finalScore > 0 ? `+${p.finalScore}` : p.finalScore}pt
+                </span>
+              </div>
+            ))}
+        </div>
 
         {/* ★ ボタン3つ */}
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "24px" }}>
