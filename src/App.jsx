@@ -24,16 +24,16 @@ const styles = {
   app: {
     minHeight: "100vh",
     background: [
+      // 地平線の陽光
+      "radial-gradient(ellipse 200% 10% at 50% 52%, rgba(255,245,200,0.28) 0%, transparent 100%)",
+      // 青空の広がり
+      "radial-gradient(ellipse 110% 60% at 40% 0%, rgba(18,82,160,0.55) 0%, transparent 80%)",
+      // グリーンの広がり
+      "radial-gradient(ellipse 110% 50% at 60% 100%, rgba(14,88,26,0.65) 0%, transparent 70%)",
       // フェアウェイの刈り込みストライプ
-      "repeating-linear-gradient(90deg, rgba(0,0,0,0.07) 0px, rgba(0,0,0,0.07) 28px, rgba(20,70,15,0.05) 28px, rgba(20,70,15,0.05) 56px)",
-      // 地平線のゴールドグロー（早朝のゴルフ場）
-      "radial-gradient(ellipse 200% 10% at 50% 60%, rgba(245,166,35,0.2) 0%, transparent 100%)",
-      // 夜明けの空
-      "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(8,20,55,0.7) 0%, transparent 75%)",
-      // 緑のフェアウェイ
-      "radial-gradient(ellipse 130% 50% at 50% 105%, rgba(12,65,18,1) 0%, transparent 60%)",
-      // ベース：空→フェアウェイ
-      "linear-gradient(180deg, #020609 0%, #061020 30%, #0b1d0c 62%, #040b04 100%)",
+      "repeating-linear-gradient(90deg, rgba(0,0,0,0.045) 0px, rgba(0,0,0,0.045) 32px, transparent 32px, transparent 64px)",
+      // ベース：青空→緑のグリーン
+      "linear-gradient(180deg, #020c1a 0%, #092d5e 22%, #0d4878 42%, #156630 57%, #0c3d18 74%, #05140a 100%)",
     ].join(", "),
     backgroundAttachment: "fixed",
     fontFamily: "'Georgia', serif",
@@ -47,9 +47,9 @@ const styles = {
     width: "100%",
     textAlign: "center",
     padding: "32px 20px 18px",
-    borderBottom: "1px solid rgba(245,166,35,0.15)",
+    borderBottom: "1px solid rgba(255,255,255,0.08)",
     marginBottom: "24px",
-    background: "linear-gradient(180deg, rgba(245,166,35,0.05) 0%, transparent 100%)",
+    background: "linear-gradient(180deg, rgba(0,0,0,0.25) 0%, transparent 100%)",
   },
   title: {
     fontSize: "24px",
@@ -67,9 +67,9 @@ const styles = {
     marginTop: "6px",
   },
   card: {
-    background: "rgba(5,18,8,0.65)",
-    backdropFilter: "blur(16px)",
-    border: "1px solid rgba(245,166,35,0.15)",
+    background: "rgba(2,10,20,0.72)",
+    backdropFilter: "blur(20px)",
+    border: "1px solid rgba(255,255,255,0.09)",
     borderRadius: "20px",
     padding: "24px 20px",
     width: "100%",
