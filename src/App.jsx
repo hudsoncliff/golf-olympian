@@ -1,4 +1,14 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { QRCodeSVG } from "qrcode.react";
+import { ref, set, onValue, off } from "firebase/database";
+import { db } from "./firebase";
+
+function generateRoomId() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let id = "";
+  for (let i = 0; i < 6; i++) id += chars[Math.floor(Math.random() * chars.length)];
+  return id;
+}
 
 const MEDAL_CONFIG = {
   gold:   { label: "🥇 金", points: 4, color: "#F5A623", bg: "#FFF8E7", border: "#F5A623" },
@@ -267,10 +277,111 @@ function getMedalKeysForCount(count) {
   return MEDAL_KEYS.slice(0, count);
 }
 
+// ── RoomBanner ─────────────────────────────────────────────────
+function RoomBanner({ roomId }) {
+  const [visible, setVisible] = useState(true);
+  const url = window.location.href.split("#")[0] + "#" + roomId;
+
+  if (!visible) {
+    return (
+      <div style={{ position: "fixed", bottom: "16px", right: "16px", zIndex: 50 }}>
+        <button
+          onClick={() => setVisible(true)}
+          style={{
+            background: "rgba(245,166,35,0.9)", color: "#0a1628",
+            border: "none", borderRadius: "50%", width: "48px", height: "48px",
+            fontSize: "20px", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+          }}
+        >🔗</button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      background: "rgba(13,33,55,0.97)", border: "1px solid rgba(245,166,35,0.4)",
+      borderRadius: "16px", padding: "20px", width: "100%", maxWidth: "420px",
+      boxSizing: "border-box", marginBottom: "12px", textAlign: "center",
+    }}>
+      <p style={{ ...styles.sectionTitle, textAlign: "center", marginBottom: "12px" }}>
+        📱 QRでリアルタイム観戦
+      </p>
+      <QRCodeSVG value={url} size={140} bgColor="transparent" fgColor="#f0e6d3" />
+      <p style={{ fontSize: "26px", letterSpacing: "0.35em", color: "#F5A623", fontWeight: "bold", margin: "12px 0 4px" }}>
+        {roomId}
+      </p>
+      <p style={{ fontSize: "11px", color: "rgba(240,230,211,0.4)", marginBottom: "12px" }}>
+        このコードを参加者に共有してください
+      </p>
+      <button onClick={() => setVisible(false)} style={{ ...styles.btn, ...styles.btnSecondary, padding: "8px", fontSize: "12px" }}>
+        閉じる
+      </button>
+    </div>
+  );
+}
+
+// ── ObserverView ────────────────────────────────────────────────
+function ObserverView({ data, roomId }) {
+  if (!data) {
+    return (
+      <div style={{ ...styles.card, maxWidth: "380px", textAlign: "center", padding: "40px 20px" }}>
+        <p style={{ fontSize: "24px", marginBottom: "12px" }}>⏳</p>
+        <p style={{ color: "rgba(240,230,211,0.5)", letterSpacing: "0.1em" }}>接続中...</p>
+        <p style={{ fontSize: "11px", color: "rgba(240,230,211,0.3)", marginTop: "8px" }}>ルーム: {roomId}</p>
+      </div>
+    );
+  }
+
+  const { players, holeResults: raw, currentHole, status } = data;
+  const holeResults = Array.isArray(raw)
+    ? raw
+    : Array.from({ length: TOTAL_HOLES }, (_, i) => raw[i] || {});
+
+  const scores = {};
+  players.forEach(p => {
+    scores[p.id] = holeResults.reduce((sum, h) => {
+      const m = h && h[p.id];
+      return sum + (m ? MEDAL_CONFIG[m].points : 0);
+    }, 0);
+  });
+
+  const sorted = players.slice().sort((a, b) => scores[b.id] - scores[a.id]);
+  let rank = 1;
+  const ranked = sorted.map((p, i) => {
+    if (i > 0 && scores[p.id] < scores[sorted[i - 1].id]) rank = i + 1;
+    return { ...p, rank };
+  });
+
+  const finished = status === "finished";
+
+  return (
+    <div style={{ ...styles.card, maxWidth: "380px" }}>
+      <p style={{ ...styles.sectionTitle, textAlign: "center", fontSize: "15px" }}>
+        {finished ? "🏆 最終結果" : `⛳ ${currentHole}H 進行中`}
+      </p>
+      {ranked.map(p => (
+        <div key={p.id} style={{
+          ...styles.scoreRow,
+          background: p.rank === 1 ? "rgba(245,166,35,0.12)" : "rgba(255,255,255,0.04)",
+          border: p.rank === 1 ? "1px solid rgba(245,166,35,0.35)" : "1px solid transparent",
+        }}>
+          <span style={styles.rank}>{getRankEmoji(p.rank)}</span>
+          <span style={styles.resultName}>{p.name}</span>
+          <span style={styles.resultScore}>{scores[p.id]}pt</span>
+        </div>
+      ))}
+      <p style={{ fontSize: "11px", color: "rgba(240,230,211,0.25)", textAlign: "center", marginTop: "16px" }}>
+        ルーム: {roomId} · リアルタイム更新中
+      </p>
+    </div>
+  );
+}
+
 // ── StartView ──────────────────────────────────────────────────
-function StartView({ onStart }) {
+function StartView({ onStart, onJoin }) {
   const [count, setCount] = useState(4);
   const [names, setNames] = useState(["", "", "", ""]);
+  const [joinCode, setJoinCode] = useState("");
 
   const updateName = (i, val) => {
     const n = [...names];
@@ -314,6 +425,26 @@ function StartView({ onStart }) {
       <button style={{ ...styles.btn, ...styles.btnPrimary }} onClick={handleStart}>
         ゲーム開始 ⛳
       </button>
+
+      {db && (
+        <div style={{ marginTop: "24px", paddingTop: "20px", borderTop: "1px solid rgba(245,166,35,0.1)" }}>
+          <p style={styles.sectionTitle}>ルームコードで参加</p>
+          <input
+            style={styles.input}
+            placeholder="例: ABC123"
+            value={joinCode}
+            onChange={e => setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
+            maxLength={6}
+          />
+          <button
+            style={{ ...styles.btn, ...styles.btnSecondary, opacity: joinCode.length !== 6 ? 0.4 : 1 }}
+            onClick={() => onJoin(joinCode)}
+            disabled={joinCode.length !== 6}
+          >
+            👁 観戦モードで参加
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -644,11 +775,55 @@ export default function App() {
   const [players, setPlayers] = useState([]);
   const [holeResults, setHoleResults] = useState(Array(TOTAL_HOLES).fill(null).map(() => ({})));
   const [currentHole, setCurrentHole] = useState(1);
+  const [roomId, setRoomId] = useState(null);
+  const [isObserver, setIsObserver] = useState(false);
+  const [observerData, setObserverData] = useState(null);
+  const observerRef = useRef(null);
+
+  // URLハッシュにルームIDがあれば自動で観戦モードに入る
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (hash && /^[A-Z0-9]{6}$/.test(hash) && db) {
+      joinRoom(hash);
+    }
+    return () => {
+      if (observerRef.current) off(observerRef.current);
+    };
+  }, []);
+
+  // ゲーム状態をFirebaseに同期（ホスト側）
+  useEffect(() => {
+    if (!db || !roomId || isObserver) return;
+    set(ref(db, `rooms/${roomId}`), {
+      players,
+      holeResults,
+      currentHole,
+      status: screen === "result" ? "finished" : "playing",
+    });
+  }, [players, holeResults, currentHole, screen, roomId, isObserver]);
+
+  const joinRoom = (code) => {
+    if (!db) return;
+    if (observerRef.current) off(observerRef.current);
+    const roomRef = ref(db, `rooms/${code}`);
+    observerRef.current = roomRef;
+    setIsObserver(true);
+    setScreen("observe");
+    onValue(roomRef, (snapshot) => {
+      setObserverData(snapshot.val());
+    });
+    window.history.replaceState(null, "", window.location.pathname + "#" + code);
+  };
 
   const handleStart = (ps) => {
     setPlayers(ps);
     setHoleResults(Array(TOTAL_HOLES).fill(null).map(() => ({})));
     setCurrentHole(1);
+    if (db) {
+      const id = generateRoomId();
+      setRoomId(id);
+      window.history.replaceState(null, "", window.location.pathname + "#" + id);
+    }
     setScreen("hole");
   };
 
@@ -659,9 +834,7 @@ export default function App() {
     setCurrentHole(h => h + 1);
   };
 
-  const handlePrev = () => {
-    setCurrentHole(h => h - 1);
-  };
+  const handlePrev = () => setCurrentHole(h => h - 1);
 
   const handleFinish = (medals) => {
     const updated = [...holeResults];
@@ -670,16 +843,20 @@ export default function App() {
     setScreen("result");
   };
 
-  // ★ 修正: 結果画面から最終ホールに戻って修正できる
   const handleEdit = () => {
     setCurrentHole(TOTAL_HOLES);
     setScreen("hole");
   };
 
-  // ★ 新しいゲーム: スタート画面に戻る（データリセット）
   const handleNewGame = () => {
+    if (observerRef.current) off(observerRef.current);
     setScreen("start");
     setCurrentHole(1);
+    setRoomId(null);
+    setIsObserver(false);
+    setObserverData(null);
+    observerRef.current = null;
+    window.history.replaceState(null, "", window.location.pathname);
   };
 
   return (
@@ -689,25 +866,37 @@ export default function App() {
         <p style={styles.subtitle}>Score Tracker</p>
       </div>
 
-      {screen === "start" && <StartView onStart={handleStart} />}
-      {screen === "hole" && (
-        <HoleInputView
-          key={currentHole}
-          players={players}
-          holeResults={holeResults}
-          currentHole={currentHole}
-          onSave={handleSave}
-          onPrev={handlePrev}
-          onFinish={handleFinish}
+      {screen === "observe" && (
+        <ObserverView
+          data={observerData}
+          roomId={window.location.hash.slice(1)}
         />
       )}
+      {screen === "start" && <StartView onStart={handleStart} onJoin={joinRoom} />}
+      {screen === "hole" && (
+        <>
+          {roomId && <RoomBanner roomId={roomId} />}
+          <HoleInputView
+            key={currentHole}
+            players={players}
+            holeResults={holeResults}
+            currentHole={currentHole}
+            onSave={handleSave}
+            onPrev={handlePrev}
+            onFinish={handleFinish}
+          />
+        </>
+      )}
       {screen === "result" && (
-        <ResultView
-          players={players}
-          holeResults={holeResults}
-          onEdit={handleEdit}
-          onNewGame={handleNewGame}
-        />
+        <>
+          {roomId && <RoomBanner roomId={roomId} />}
+          <ResultView
+            players={players}
+            holeResults={holeResults}
+            onEdit={handleEdit}
+            onNewGame={handleNewGame}
+          />
+        </>
       )}
     </div>
   );
