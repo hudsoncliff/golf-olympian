@@ -24,10 +24,16 @@ const styles = {
   app: {
     minHeight: "100vh",
     background: [
-      "radial-gradient(ellipse 130% 45% at 50% -5%, rgba(245,166,35,0.13) 0%, transparent 60%)",
-      "radial-gradient(ellipse 55% 65% at 5% 95%, rgba(15,70,40,0.35) 0%, transparent 65%)",
-      "radial-gradient(ellipse 45% 55% at 98% 5%, rgba(8,25,65,0.45) 0%, transparent 60%)",
-      "linear-gradient(168deg, #050d18 0%, #07160f 55%, #040b07 100%)",
+      // フェアウェイの刈り込みストライプ
+      "repeating-linear-gradient(90deg, rgba(0,0,0,0.07) 0px, rgba(0,0,0,0.07) 28px, rgba(20,70,15,0.05) 28px, rgba(20,70,15,0.05) 56px)",
+      // 地平線のゴールドグロー（早朝のゴルフ場）
+      "radial-gradient(ellipse 200% 10% at 50% 60%, rgba(245,166,35,0.2) 0%, transparent 100%)",
+      // 夜明けの空
+      "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(8,20,55,0.7) 0%, transparent 75%)",
+      // 緑のフェアウェイ
+      "radial-gradient(ellipse 130% 50% at 50% 105%, rgba(12,65,18,1) 0%, transparent 60%)",
+      // ベース：空→フェアウェイ
+      "linear-gradient(180deg, #020609 0%, #061020 30%, #0b1d0c 62%, #040b04 100%)",
     ].join(", "),
     backgroundAttachment: "fixed",
     fontFamily: "'Georgia', serif",
@@ -61,9 +67,9 @@ const styles = {
     marginTop: "6px",
   },
   card: {
-    background: "rgba(255,255,255,0.035)",
-    backdropFilter: "blur(12px)",
-    border: "1px solid rgba(245,166,35,0.12)",
+    background: "rgba(5,18,8,0.65)",
+    backdropFilter: "blur(16px)",
+    border: "1px solid rgba(245,166,35,0.15)",
     borderRadius: "20px",
     padding: "24px 20px",
     width: "100%",
