@@ -280,13 +280,26 @@ function getMedalKeysForCount(count) {
 // ── RoomBanner ─────────────────────────────────────────────────
 function RoomBanner({ roomId }) {
   const [visible, setVisible] = useState(true);
+  const [copied, setCopied] = useState(false);
   const url = window.location.href.split("#")[0] + "#" + roomId;
+  const canShare = !!navigator.share;
+
+  const handleShare = () => {
+    if (canShare) {
+      navigator.share({ title: "Golf Olympics", url });
+    } else {
+      navigator.clipboard?.writeText(url).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
+    }
+  };
 
   if (!visible) {
     return (
       <div style={{ position: "fixed", bottom: "16px", right: "16px", zIndex: 50 }}>
         <button
-          onClick={() => setVisible(true)}
+          onClick={handleShare}
           style={{
             background: "rgba(245,166,35,0.9)", color: "#0a1628",
             border: "none", borderRadius: "50%", width: "48px", height: "48px",
@@ -303,17 +316,24 @@ function RoomBanner({ roomId }) {
       borderRadius: "16px", padding: "20px", width: "100%", maxWidth: "420px",
       boxSizing: "border-box", marginBottom: "12px", textAlign: "center",
     }}>
-      <p style={{ ...styles.sectionTitle, textAlign: "center", marginBottom: "12px" }}>
-        📱 QRでリアルタイム観戦
+      <p style={{ ...styles.sectionTitle, textAlign: "center", marginBottom: "16px" }}>
+        📱 参加者に共有する
       </p>
-      <QRCodeSVG value={url} size={140} bgColor="transparent" fgColor="#f0e6d3" />
-      <p style={{ fontSize: "26px", letterSpacing: "0.35em", color: "#F5A623", fontWeight: "bold", margin: "12px 0 4px" }}>
-        {roomId}
-      </p>
-      <p style={{ fontSize: "11px", color: "rgba(240,230,211,0.4)", marginBottom: "12px" }}>
-        このコードを参加者に共有してください
-      </p>
-      <button onClick={() => setVisible(false)} style={{ ...styles.btn, ...styles.btnSecondary, padding: "8px", fontSize: "12px" }}>
+      <button
+        onClick={handleShare}
+        style={{ ...styles.btn, ...styles.btnPrimary, marginBottom: "16px", fontSize: "16px" }}
+      >
+        {canShare ? "🔗 このゲームを共有" : copied ? "✅ コピーしました" : "🔗 URLをコピー"}
+      </button>
+      {!canShare && (
+        <>
+          <QRCodeSVG value={url} size={120} bgColor="transparent" fgColor="#f0e6d3" />
+          <p style={{ fontSize: "22px", letterSpacing: "0.3em", color: "#F5A623", fontWeight: "bold", margin: "10px 0 4px" }}>
+            {roomId}
+          </p>
+        </>
+      )}
+      <button onClick={() => setVisible(false)} style={{ ...styles.btn, ...styles.btnSecondary, padding: "8px", fontSize: "12px", marginTop: "8px" }}>
         閉じる
       </button>
     </div>
