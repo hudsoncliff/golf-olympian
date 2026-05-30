@@ -32,7 +32,10 @@ enum AppSettings {
     }
 
     static var defaultRate: Int {
-        get { defaults.integer(forKey: "defaultRate") }
+        get {
+            let stored = defaults.integer(forKey: "defaultRate")
+            return stored == 0 ? 100 : stored
+        }
         set { defaults.set(newValue, forKey: "defaultRate") }
     }
 
