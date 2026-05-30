@@ -612,29 +612,14 @@ function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFi
         </button>
       </div>
 
-      {/* Neapin section (short hole only) */}
-      {isShort && (
-        <>
-          <div style={styles.divider} />
-          <SubTitle note="グリーンオン後・カップに最も近い → +2pt">📍 ニアピン賞</SubTitle>
-          {players.map(p => (
-            <div key={p.id} style={styles.playerRow}>
-              <div style={styles.playerName}>{p.name}</div>
-              <button onClick={() => selectNeapin(p.id)} style={specialBtn(neapin === p.id, SPECIAL_CONFIG.neapin)}>
-                {SPECIAL_CONFIG.neapin.label}
-              </button>
-            </div>
-          ))}
-        </>
-      )}
-
       <div style={styles.divider} />
 
-      {/* Combined: medal + diamond + saoichi per player */}
-      <SubTitle note="1パット→メダル選択 / チップイン→💎 / 旗竿より遠い→🚩">メダル割り当て</SubTitle>
+      {/* Combined: medal + diamond + saoichi + neapin per player */}
+      <SubTitle note="1パット→メダル選択 / チップイン→💎 / 旗竿より遠い→🚩 / ニアピン→📍">メダル割り当て</SubTitle>
       {players.map(player => {
         const isDiamond = !!diamonds[player.id];
         const isSaoichi = !!saoichi[player.id];
+        const isNeapin = neapin === player.id;
         return (
           <div key={player.id} style={{ marginBottom: "14px", paddingBottom: "14px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
             <div style={{ fontSize: "13px", fontWeight: "bold", marginBottom: "7px" }}>{player.name}</div>
@@ -672,13 +657,16 @@ function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFi
                 })
               )}
             </div>
-            {/* Diamond + Saoichi toggles */}
-            <div style={{ display: "flex", gap: "6px" }}>
+            {/* Diamond + Saoichi + Neapin toggles */}
+            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
               <button onClick={() => toggleDiamond(player.id)} style={specialBtn(isDiamond, SPECIAL_CONFIG.diamond)}>
                 {SPECIAL_CONFIG.diamond.label}
               </button>
               <button onClick={() => toggleSaoichi(player.id)} style={specialBtn(isSaoichi, SPECIAL_CONFIG.saoichi)}>
                 {SPECIAL_CONFIG.saoichi.label}
+              </button>
+              <button onClick={() => selectNeapin(player.id)} style={specialBtn(isNeapin, SPECIAL_CONFIG.neapin)}>
+                {SPECIAL_CONFIG.neapin.label}
               </button>
             </div>
           </div>
