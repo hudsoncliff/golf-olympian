@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HoleInputView: View {
     var session: GameSession
+    var roomId: String?
     var onFinish: () -> Void
     var onHoleSaved: (() -> Void)?
     var onQuit: (() -> Void)?
@@ -9,8 +10,9 @@ struct HoleInputView: View {
     @State private var draft: HoleResult
     @State private var showQuitAlert = false
 
-    init(session: GameSession, onFinish: @escaping () -> Void, onHoleSaved: (() -> Void)? = nil, onQuit: (() -> Void)? = nil) {
+    init(session: GameSession, roomId: String? = nil, onFinish: @escaping () -> Void, onHoleSaved: (() -> Void)? = nil, onQuit: (() -> Void)? = nil) {
         self.session = session
+        self.roomId = roomId
         self.onFinish = onFinish
         self.onHoleSaved = onHoleSaved
         self.onQuit = onQuit
@@ -35,6 +37,13 @@ struct HoleInputView: View {
         ScrollView {
             VStack(spacing: 16) {
                 AppHeader()
+                    .overlay(alignment: .topTrailing) {
+                        if let roomId {
+                            ShareButton(roomId: roomId)
+                                .padding(.top, 8)
+                                .padding(.trailing, 4)
+                        }
+                    }
 
                 // ホール番号・プログレスバー
                 VStack(spacing: 8) {

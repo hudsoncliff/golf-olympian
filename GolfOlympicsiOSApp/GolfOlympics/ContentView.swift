@@ -32,27 +32,21 @@ struct ContentView: View {
                 )
 
             case .hole:
-                ScrollView {
-                    VStack(spacing: 12) {
-                        if let roomId = sync.roomId {
-                            ShareBannerView(roomId: roomId)
-                        }
-                        HoleInputView(
-                            session: session,
-                            onFinish: {
-                                sync.push(session: session, finished: true)
-                                screen = .result
-                            },
-                            onHoleSaved: {
-                                sync.push(session: session)
-                            },
-                            onQuit: {
-                                sync.stopHosting()
-                                screen = .start
-                            }
-                        )
+                HoleInputView(
+                    session: session,
+                    roomId: sync.roomId,
+                    onFinish: {
+                        sync.push(session: session, finished: true)
+                        screen = .result
+                    },
+                    onHoleSaved: {
+                        sync.push(session: session)
+                    },
+                    onQuit: {
+                        sync.stopHosting()
+                        screen = .start
                     }
-                }
+                )
 
             case .result:
                 ResultView(session: session) {
