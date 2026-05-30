@@ -75,6 +75,11 @@ struct HoleInputView: View {
                         }
                     }
 
+                    // 共有ボタン分のスペース確保（オーバーレイと重ならないよう）
+                    if roomId != nil {
+                        Spacer().frame(width: 52)
+                    }
+
                 }
                 .padding(.vertical, 8)
                 .cardStyle()
