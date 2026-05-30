@@ -533,7 +533,7 @@ function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFi
   const [holeData, setHoleData] = useState(() => normalizeHoleResult(saved));
 
   const [confirmAbort, setConfirmAbort] = useState(false);
-  const { medals, diamonds, saoichi, neapin, isShort } = holeData;
+  const { medals, diamonds, saoichi, neapin } = holeData;
 
   const nonDiamondPlayers = players.filter(p => !diamonds[p.id]);
   const availableMedals = getMedalKeysForCount(nonDiamondPlayers.length);
@@ -602,15 +602,6 @@ function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFi
         <div style={{ ...styles.progressFill, width: `${(currentHole / TOTAL_HOLES) * 100}%` }} />
       </div>
 
-      {/* Short hole toggle */}
-      <div style={{ marginBottom: "4px" }}>
-        <button
-          onClick={() => setHoleData(prev => ({ ...prev, isShort: !prev.isShort }))}
-          style={specialBtn(isShort, SPECIAL_CONFIG.neapin)}
-        >
-          ⛳ ショートホール
-        </button>
-      </div>
 
       <div style={styles.divider} />
 
@@ -881,7 +872,7 @@ function ResultView({ players, holeResults, onEdit, onNewGame }) {
                 {holeResults.map((h, i) => (
                   <tr key={i}>
                     <td style={{ padding: "3px 6px", color: "rgba(240,230,211,0.5)" }}>
-                      {i + 1}{h.isShort ? "★" : ""}
+                      {i + 1}
                     </td>
                     {players.map(p => {
                       const { medals: hm = {}, diamonds: hd = {}, saoichi: hs = {}, neapin: hn } = h;
