@@ -3,12 +3,14 @@ import SwiftUI
 struct HoleInputView: View {
     var session: GameSession
     var onFinish: () -> Void
+    var onHoleSaved: (() -> Void)?
 
     @State private var draft: HoleResult
 
-    init(session: GameSession, onFinish: @escaping () -> Void) {
+    init(session: GameSession, onFinish: @escaping () -> Void, onHoleSaved: (() -> Void)? = nil) {
         self.session = session
         self.onFinish = onFinish
+        self.onHoleSaved = onHoleSaved
         let idx = max(0, min(session.currentHole - 1, 17))
         self._draft = State(initialValue: session.holeResults[idx])
     }
@@ -131,6 +133,7 @@ struct HoleInputView: View {
         session.holeResults[session.currentHole - 1] = draft
         session.currentHole += delta
         draft = session.holeResults[session.currentHole - 1]
+        onHoleSaved?()
     }
 
     private func saveAndFinish() {

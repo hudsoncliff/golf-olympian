@@ -2,15 +2,18 @@ import SwiftUI
 
 struct StartView: View {
     var onStart: ([Player]) -> Void
+    var onJoin:  (String) -> Void
 
     @State private var playerCount = 4
     @State private var names = Array(repeating: "", count: 4)
+    @State private var joinCode = ""
 
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
                 AppHeader()
 
+                // ゲーム開始カード
                 VStack(alignment: .leading, spacing: 16) {
                     Text("プレイヤー人数")
                         .sectionTitleStyle()
@@ -41,6 +44,26 @@ struct StartView: View {
                     .padding(.top, 8)
                 }
                 .cardStyle()
+
+                // 観戦参加カード
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("ルームコードで参加")
+                        .sectionTitleStyle()
+
+                    AppTextField(
+                        placeholder: "例: ABC123",
+                        text: Binding(
+                            get: { joinCode },
+                            set: { joinCode = $0.uppercased().filter { $0.isLetter || $0.isNumber }.prefix(6).map(String.init).joined() }
+                        )
+                    )
+
+                    Button("👁 観戦モードで参加") { onJoin(joinCode) }
+                        .buttonStyle(SecondaryButtonStyle())
+                        .disabled(joinCode.count != 6)
+                        .opacity(joinCode.count == 6 ? 1 : 0.4)
+                }
+                .cardStyle()
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 40)
@@ -51,6 +74,6 @@ struct StartView: View {
 #Preview {
     ZStack {
         AppBackground()
-        StartView { _ in }
+        StartView(onStart: { _ in }, onJoin: { _ in })
     }
 }

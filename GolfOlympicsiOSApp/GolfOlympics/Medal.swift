@@ -39,4 +39,24 @@ enum Medal: Int, CaseIterable, Codable, Identifiable {
     static func keys(for count: Int) -> [Medal] {
         Array([.gold, .silver, .bronze, .iron].prefix(max(0, count)))
     }
+
+    // Firebase 用のキー文字列
+    var key: String {
+        switch self {
+        case .gold:   return "gold"
+        case .silver: return "silver"
+        case .bronze: return "bronze"
+        case .iron:   return "iron"
+        }
+    }
+
+    static func from(key: String) -> Medal? {
+        switch key {
+        case "gold":   return .gold
+        case "silver": return .silver
+        case "bronze": return .bronze
+        case "iron":   return .iron
+        default:       return nil
+        }
+    }
 }
