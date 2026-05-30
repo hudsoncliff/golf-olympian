@@ -17,22 +17,48 @@ const MEDAL_CONFIG = {
   iron:   { label: "🔩 鉄", points: 1, color: "#607D8B", bg: "#ECEFF1", border: "#607D8B" },
 };
 
+const SPECIAL_CONFIG = {
+  diamond: { label: "💎 ダイヤ", points: 5, color: "#64D4F7", bg: "rgba(100,212,247,0.15)", border: "#64D4F7" },
+  saoichi: { label: "🚩 竿イチ権", bonus: 3, color: "#A78BFA", bg: "rgba(167,139,250,0.12)", border: "#A78BFA" },
+  neapin:  { label: "📍 ニアピン", points: 2, color: "#34D399", bg: "rgba(52,211,153,0.12)", border: "#34D399" },
+};
+
 const MEDAL_KEYS = ["gold", "silver", "bronze", "iron"];
 const TOTAL_HOLES = 18;
+
+function emptyHoleResult() {
+  return { medals: {}, diamonds: {}, saoichi: {}, neapin: null, isShort: false };
+}
+
+function normalizeHoleResult(h) {
+  if (!h) return emptyHoleResult();
+  if (h.medals !== undefined) return h;
+  // legacy flat format: { playerId: medalKey }
+  return { medals: { ...h }, diamonds: {}, saoichi: {}, neapin: null, isShort: false };
+}
+
+function calcHolePoints(playerId, hole) {
+  if (!hole) return 0;
+  const { medals = {}, diamonds = {}, saoichi = {}, neapin } = hole;
+  let pts = 0;
+  if (diamonds[playerId]) {
+    pts += SPECIAL_CONFIG.diamond.points;
+  } else if (medals[playerId]) {
+    pts += MEDAL_CONFIG[medals[playerId]].points;
+    if (saoichi[playerId]) pts += SPECIAL_CONFIG.saoichi.bonus;
+  }
+  if (neapin === playerId) pts += SPECIAL_CONFIG.neapin.points;
+  return pts;
+}
 
 const styles = {
   app: {
     minHeight: "100vh",
     background: [
-      // 地平線の陽光
       "radial-gradient(ellipse 200% 10% at 50% 52%, rgba(255,245,200,0.28) 0%, transparent 100%)",
-      // 青空の広がり
       "radial-gradient(ellipse 110% 60% at 40% 0%, rgba(18,82,160,0.55) 0%, transparent 80%)",
-      // グリーンの広がり
       "radial-gradient(ellipse 110% 50% at 60% 100%, rgba(14,88,26,0.65) 0%, transparent 70%)",
-      // フェアウェイの刈り込みストライプ
       "repeating-linear-gradient(90deg, rgba(0,0,0,0.045) 0px, rgba(0,0,0,0.045) 32px, transparent 32px, transparent 64px)",
-      // ベース：青空→緑のグリーン
       "linear-gradient(180deg, #020c1a 0%, #092d5e 22%, #0d4878 42%, #156630 57%, #0c3d18 74%, #05140a 100%)",
     ].join(", "),
     backgroundAttachment: "fixed",
@@ -127,7 +153,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    marginBottom: "14px",
+    marginBottom: "10px",
   },
   playerName: {
     fontSize: "14px",
@@ -279,7 +305,27 @@ const styles = {
     maxWidth: "360px",
     boxSizing: "border-box",
   },
+  divider: {
+    borderTop: "1px solid rgba(255,255,255,0.07)",
+    margin: "16px 0",
+  },
 };
+
+function specialBtn(selected, cfg) {
+  return {
+    padding: "5px 12px",
+    borderRadius: "7px",
+    border: `1.5px solid ${selected ? cfg.border : "rgba(255,255,255,0.12)"}`,
+    background: selected ? cfg.bg : "transparent",
+    color: selected ? cfg.color : "rgba(240,230,211,0.4)",
+    fontSize: "12px",
+    cursor: "pointer",
+    fontFamily: "Georgia, serif",
+    transition: "all 0.15s",
+    fontWeight: selected ? "bold" : "normal",
+    whiteSpace: "nowrap",
+  };
+}
 
 function getRankEmoji(rank) {
   if (rank === 1) return "🥇";
@@ -374,10 +420,7 @@ function ObserverView({ data, roomId }) {
 
   const scores = {};
   players.forEach(p => {
-    scores[p.id] = holeResults.reduce((sum, h) => {
-      const m = h && h[p.id];
-      return sum + (m ? MEDAL_CONFIG[m].points : 0);
-    }, 0);
+    scores[p.id] = holeResults.reduce((sum, h) => sum + calcHolePoints(p.id, normalizeHoleResult(h)), 0);
   });
 
   const sorted = players.slice().sort((a, b) => scores[b.id] - scores[a.id]);
@@ -486,38 +529,66 @@ function StartView({ onStart, onJoin }) {
 
 // ── HoleInputView ──────────────────────────────────────────────
 function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFinish }) {
-  // ★ 修正: 前ホールのデータは引き継がず、保存済みデータがあればそれを初期値にする
   const saved = holeResults[currentHole - 1];
-  const hasSaved = saved && Object.keys(saved).length > 0;
-  const [medals, setMedals] = useState(hasSaved ? saved : {});
+  const [holeData, setHoleData] = useState(() => normalizeHoleResult(saved));
 
-  const availableMedals = getMedalKeysForCount(players.length);
+  const { medals, diamonds, saoichi, neapin, isShort } = holeData;
+
+  const nonDiamondPlayers = players.filter(p => !diamonds[p.id]);
+  const availableMedals = getMedalKeysForCount(nonDiamondPlayers.length);
+
+  const toggleDiamond = (pid) => {
+    setHoleData(prev => {
+      const wasOn = !!prev.diamonds[pid];
+      const nextDiamonds = { ...prev.diamonds };
+      const nextMedals = { ...prev.medals };
+      if (wasOn) {
+        delete nextDiamonds[pid];
+      } else {
+        nextDiamonds[pid] = true;
+        delete nextMedals[pid];
+      }
+      return { ...prev, diamonds: nextDiamonds, medals: nextMedals };
+    });
+  };
+
+  const toggleSaoichi = (pid) => {
+    setHoleData(prev => {
+      const nextSaoichi = { ...prev.saoichi };
+      if (nextSaoichi[pid]) delete nextSaoichi[pid];
+      else nextSaoichi[pid] = true;
+      return { ...prev, saoichi: nextSaoichi };
+    });
+  };
 
   const selectMedal = useCallback((playerId, medal) => {
-    setMedals(prev => {
-      const next = { ...prev };
-      // 同じメダルを他のプレイヤーが持っていたら外す
-      Object.keys(next).forEach(pid => {
-        if (next[pid] === medal) delete next[pid];
-      });
-      // 同じボタンを再タップで解除
-      if (prev[playerId] === medal) {
-        delete next[playerId];
-      } else {
-        next[playerId] = medal;
-      }
-      return next;
+    setHoleData(prev => {
+      const next = { ...prev.medals };
+      Object.keys(next).forEach(pid => { if (next[pid] === medal) delete next[pid]; });
+      if (prev.medals[playerId] === medal) delete next[playerId];
+      else next[playerId] = medal;
+      return { ...prev, medals: next };
     });
   }, []);
 
-  const totalScore = (pid) =>
+  const selectNeapin = (pid) => {
+    setHoleData(prev => ({ ...prev, neapin: prev.neapin === pid ? null : pid }));
+  };
+
+  const prevTotal = (pid) =>
     holeResults.reduce((sum, h, idx) => {
-      if (idx === currentHole - 1) return sum; // 現在ホールは除く（下でリアルタイム加算）
-      const m = h[pid];
-      return sum + (m ? MEDAL_CONFIG[m].points : 0);
+      if (idx === currentHole - 1) return sum;
+      return sum + calcHolePoints(pid, h);
     }, 0);
 
   const isLast = currentHole === TOTAL_HOLES;
+
+  const SubTitle = ({ children, note }) => (
+    <div style={{ marginTop: "16px", marginBottom: "4px" }}>
+      <p style={{ ...styles.sectionTitle, marginBottom: note ? "4px" : "12px" }}>{children}</p>
+      {note && <p style={{ fontSize: "11px", color: "rgba(240,230,211,0.4)", marginBottom: "10px" }}>{note}</p>}
+    </div>
+  );
 
   return (
     <div style={{ ...styles.card, maxWidth: "420px" }}>
@@ -530,51 +601,108 @@ function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFi
         <div style={{ ...styles.progressFill, width: `${(currentHole / TOTAL_HOLES) * 100}%` }} />
       </div>
 
-      <p style={styles.sectionTitle}>メダル割り当て</p>
-      <p style={{ fontSize: "11px", color: "rgba(240,230,211,0.45)", marginBottom: "14px", marginTop: "-10px" }}>
-        1パットで決めたプレイヤーのメダルを選択（再タップで解除）
-      </p>
+      {/* Short hole toggle */}
+      <div style={{ marginBottom: "4px" }}>
+        <button
+          onClick={() => setHoleData(prev => ({ ...prev, isShort: !prev.isShort }))}
+          style={specialBtn(isShort, SPECIAL_CONFIG.neapin)}
+        >
+          ⛳ ショートホール
+        </button>
+      </div>
 
-      {players.map(player => (
-        <div key={player.id} style={styles.playerRow}>
-          <div style={styles.playerName}>{player.name}</div>
-          <div style={styles.medalBtns}>
-            {availableMedals.map(mk => {
-              const cfg = MEDAL_CONFIG[mk];
-              const selected = medals[player.id] === mk;
-              return (
-                <button
-                  key={mk}
-                  onClick={() => selectMedal(player.id, mk)}
-                  style={{
-                    padding: "5px 8px",
-                    borderRadius: "7px",
-                    border: `1.5px solid ${selected ? cfg.border : "rgba(255,255,255,0.12)"}`,
-                    background: selected ? cfg.bg : "transparent",
-                    color: selected ? cfg.color : "rgba(240,230,211,0.5)",
-                    fontSize: "12px",
-                    cursor: "pointer",
-                    fontFamily: "Georgia, serif",
-                    transition: "all 0.15s",
-                    whiteSpace: "nowrap",
-                    fontWeight: selected ? "bold" : "normal",
-                  }}
-                >
-                  {cfg.label}
-                </button>
-              );
-            })}
-          </div>
+      <div style={styles.divider} />
+
+      {/* Diamond section */}
+      <SubTitle note="グリーン外からチップイン → +5pt・メダル対象外">💎 ダイヤモンド</SubTitle>
+      {players.map(p => (
+        <div key={p.id} style={styles.playerRow}>
+          <div style={styles.playerName}>{p.name}</div>
+          <button onClick={() => toggleDiamond(p.id)} style={specialBtn(!!diamonds[p.id], SPECIAL_CONFIG.diamond)}>
+            {SPECIAL_CONFIG.diamond.label}
+          </button>
         </div>
       ))}
 
-      {/* ミニスコアボード */}
+      <div style={styles.divider} />
+
+      {/* Saoichi section */}
+      <SubTitle note="ボールとカップの距離が旗竿より長い → 1パット成功時 +3pt">🚩 竿イチ権利</SubTitle>
+      {players.map(p => (
+        <div key={p.id} style={styles.playerRow}>
+          <div style={styles.playerName}>{p.name}</div>
+          <button onClick={() => toggleSaoichi(p.id)} style={specialBtn(!!saoichi[p.id], SPECIAL_CONFIG.saoichi)}>
+            {SPECIAL_CONFIG.saoichi.label}
+          </button>
+        </div>
+      ))}
+
+      {/* Neapin section (short hole only) */}
+      {isShort && (
+        <>
+          <div style={styles.divider} />
+          <SubTitle note="グリーンオン後・カップに最も近い → +2pt">📍 ニアピン賞</SubTitle>
+          {players.map(p => (
+            <div key={p.id} style={styles.playerRow}>
+              <div style={styles.playerName}>{p.name}</div>
+              <button onClick={() => selectNeapin(p.id)} style={specialBtn(neapin === p.id, SPECIAL_CONFIG.neapin)}>
+                {SPECIAL_CONFIG.neapin.label}
+              </button>
+            </div>
+          ))}
+        </>
+      )}
+
+      <div style={styles.divider} />
+
+      {/* Medal section */}
+      <SubTitle note="1パットで決めたプレイヤーのメダルを選択（ダイヤ選択者は除外）">メダル割り当て</SubTitle>
+      {nonDiamondPlayers.length === 0 ? (
+        <p style={{ fontSize: "12px", color: "rgba(240,230,211,0.3)", marginBottom: "10px" }}>
+          全員ダイヤモンドのためメダルなし
+        </p>
+      ) : (
+        nonDiamondPlayers.map(player => (
+          <div key={player.id} style={styles.playerRow}>
+            <div style={styles.playerName}>{player.name}</div>
+            <div style={styles.medalBtns}>
+              {availableMedals.map(mk => {
+                const cfg = MEDAL_CONFIG[mk];
+                const selected = medals[player.id] === mk;
+                return (
+                  <button
+                    key={mk}
+                    onClick={() => selectMedal(player.id, mk)}
+                    style={{
+                      padding: "5px 8px",
+                      borderRadius: "7px",
+                      border: `1.5px solid ${selected ? cfg.border : "rgba(255,255,255,0.12)"}`,
+                      background: selected ? cfg.bg : "transparent",
+                      color: selected ? cfg.color : "rgba(240,230,211,0.5)",
+                      fontSize: "12px",
+                      cursor: "pointer",
+                      fontFamily: "Georgia, serif",
+                      transition: "all 0.15s",
+                      whiteSpace: "nowrap",
+                      fontWeight: selected ? "bold" : "normal",
+                    }}
+                  >
+                    {cfg.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))
+      )}
+
+      {/* Mini scoreboard */}
       <div style={styles.miniScore}>
         {players.map(p => (
           <span key={p.id}>
             {p.name}:{" "}
             <span style={{ color: "#F5A623", fontWeight: "bold" }}>
-              {totalScore(p.id) + (medals[p.id] ? MEDAL_CONFIG[medals[p.id]].points : 0)}pt
+              {prevTotal(p.id) + calcHolePoints(p.id, holeData)}pt
             </span>
           </span>
         ))}
@@ -588,7 +716,7 @@ function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFi
         )}
         <button
           style={{ ...styles.btn, ...styles.btnPrimary, flex: 2 }}
-          onClick={() => isLast ? onFinish(medals) : onSave(medals)}
+          onClick={() => isLast ? onFinish(holeData) : onSave(holeData)}
         >
           {isLast ? "結果を見る 🏆" : "次のホールへ →"}
         </button>
@@ -625,7 +753,6 @@ function RateModal({ players, scores, onClose }) {
           💴 レート計算
         </p>
 
-        {/* レート入力 */}
         <p style={{ fontSize: "12px", color: "rgba(240,230,211,0.6)", marginBottom: "8px" }}>
           1ポイントあたりのレート（円）
         </p>
@@ -637,7 +764,6 @@ function RateModal({ players, scores, onClose }) {
           onChange={e => setRate(e.target.value)}
         />
 
-        {/* スコア一覧 */}
         <div style={styles.rateBox}>
           <div style={{ fontSize: "11px", color: "rgba(240,230,211,0.4)", marginBottom: "10px", letterSpacing: "0.1em" }}>
             ポイント集計
@@ -653,7 +779,6 @@ function RateModal({ players, scores, onClose }) {
             ))}
         </div>
 
-        {/* 精算結果 */}
         {rateNum > 0 && (
           <div style={{ marginTop: "16px" }}>
             <div style={{ fontSize: "11px", color: "rgba(240,230,211,0.4)", marginBottom: "10px", letterSpacing: "0.1em" }}>
@@ -692,10 +817,7 @@ function ResultView({ players, holeResults, onEdit, onNewGame }) {
 
   const scores = {};
   players.forEach(p => {
-    scores[p.id] = holeResults.reduce((sum, h) => {
-      const m = h[p.id];
-      return sum + (m ? MEDAL_CONFIG[m].points : 0);
-    }, 0);
+    scores[p.id] = holeResults.reduce((sum, h) => sum + calcHolePoints(p.id, h), 0);
   });
 
   const sorted = players.slice().sort((a, b) => scores[b.id] - scores[a.id]);
@@ -746,13 +868,25 @@ function ResultView({ players, holeResults, onEdit, onNewGame }) {
               <tbody>
                 {holeResults.map((h, i) => (
                   <tr key={i}>
-                    <td style={{ padding: "3px 6px", color: "rgba(240,230,211,0.5)" }}>{i + 1}</td>
+                    <td style={{ padding: "3px 6px", color: "rgba(240,230,211,0.5)" }}>
+                      {i + 1}{h.isShort ? "★" : ""}
+                    </td>
                     {players.map(p => {
-                      const m = h[p.id];
-                      const cfg = m ? MEDAL_CONFIG[m] : null;
+                      const { medals: hm = {}, diamonds: hd = {}, saoichi: hs = {}, neapin: hn } = h;
+                      let display = "ー";
+                      let color = "rgba(255,255,255,0.2)";
+                      if (hd[p.id]) {
+                        display = "💎";
+                        color = SPECIAL_CONFIG.diamond.color;
+                      } else if (hm[p.id]) {
+                        const cfg = MEDAL_CONFIG[hm[p.id]];
+                        display = cfg.label.split(" ")[0] + (hs[p.id] ? "🚩" : "");
+                        color = cfg.color;
+                      }
+                      if (hn === p.id) display += "📍";
                       return (
-                        <td key={p.id} style={{ textAlign: "center", padding: "3px 6px", color: cfg ? cfg.color : "rgba(255,255,255,0.2)" }}>
-                          {cfg ? cfg.label.split(" ")[0] : "ー"}
+                        <td key={p.id} style={{ textAlign: "center", padding: "3px 6px", color }}>
+                          {display}
                         </td>
                       );
                     })}
@@ -787,7 +921,6 @@ function ResultView({ players, holeResults, onEdit, onNewGame }) {
             ))}
         </div>
 
-        {/* ★ ボタン3つ */}
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "24px" }}>
           <button style={{ ...styles.btn, ...styles.btnPrimary }} onClick={() => setShowRate(true)}>
             💴 レート計算・集計
@@ -808,14 +941,13 @@ function ResultView({ players, holeResults, onEdit, onNewGame }) {
 export default function App() {
   const [screen, setScreen] = useState("start");
   const [players, setPlayers] = useState([]);
-  const [holeResults, setHoleResults] = useState(Array(TOTAL_HOLES).fill(null).map(() => ({})));
+  const [holeResults, setHoleResults] = useState(Array(TOTAL_HOLES).fill(null).map(() => emptyHoleResult()));
   const [currentHole, setCurrentHole] = useState(1);
   const [roomId, setRoomId] = useState(null);
   const [isObserver, setIsObserver] = useState(false);
   const [observerData, setObserverData] = useState(null);
   const observerRef = useRef(null);
 
-  // URLハッシュにルームIDがあれば自動で観戦モードに入る
   useEffect(() => {
     const hash = window.location.hash.slice(1);
     if (hash && /^[A-Z0-9]{6}$/.test(hash) && db) {
@@ -826,7 +958,6 @@ export default function App() {
     };
   }, []);
 
-  // ゲーム状態をFirebaseに同期（ホスト側）
   useEffect(() => {
     if (!db || !roomId || isObserver) return;
     set(ref(db, `rooms/${roomId}`), {
@@ -852,7 +983,7 @@ export default function App() {
 
   const handleStart = (ps) => {
     setPlayers(ps);
-    setHoleResults(Array(TOTAL_HOLES).fill(null).map(() => ({})));
+    setHoleResults(Array(TOTAL_HOLES).fill(null).map(() => emptyHoleResult()));
     setCurrentHole(1);
     if (db) {
       const id = generateRoomId();
@@ -862,18 +993,18 @@ export default function App() {
     setScreen("hole");
   };
 
-  const handleSave = (medals) => {
+  const handleSave = (holeData) => {
     const updated = [...holeResults];
-    updated[currentHole - 1] = medals;
+    updated[currentHole - 1] = holeData;
     setHoleResults(updated);
     setCurrentHole(h => h + 1);
   };
 
   const handlePrev = () => setCurrentHole(h => h - 1);
 
-  const handleFinish = (medals) => {
+  const handleFinish = (holeData) => {
     const updated = [...holeResults];
-    updated[currentHole - 1] = medals;
+    updated[currentHole - 1] = holeData;
     setHoleResults(updated);
     setScreen("result");
   };
