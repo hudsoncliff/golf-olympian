@@ -54,7 +54,7 @@ struct SettingsView: View {
 
                 // スペシャルオプション設定
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("スペシャルオプション")
+                    Text("オプション")
                         .sectionTitleStyle()
 
                     PointStepperRow(label: "💎 ダイヤ",      value: $config.diamond)
