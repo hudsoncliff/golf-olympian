@@ -1,0 +1,9 @@
+# Firebase - 機密情報
+GoogleService-Info.plist
+
+# macOS
+.DS_Store
+
+# Xcode user-specific
+xcuserdata/
+*.xcuserstate

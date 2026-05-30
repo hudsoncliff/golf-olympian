@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		2A3CE2B12FCACC4E0047D9A1 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 2A3CE2B02FCACC4E0047D9A1 /* FirebaseDatabase */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		2A0674ED2FCABAED00D4FB39 /* GolfOlympics.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GolfOlympics.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A3CE2B12FCACC4E0047D9A1 /* FirebaseDatabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = GolfOlympics;
 			packageProductDependencies = (
+				2A3CE2B02FCACC4E0047D9A1 /* FirebaseDatabase */,
 			);
 			productName = GolfOlympics;
 			productReference = 2A0674ED2FCABAED00D4FB39 /* GolfOlympics.app */;
@@ -94,6 +100,9 @@
 			);
 			mainGroup = 2A0674E42FCABAED00D4FB39;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				2A3CE2AF2FCACC4E0047D9A1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2A0674EE2FCABAED00D4FB39 /* Products */;
 			projectDirPath = "";
@@ -330,6 +339,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2A3CE2AF2FCACC4E0047D9A1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.14.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2A3CE2B02FCACC4E0047D9A1 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2A3CE2AF2FCACC4E0047D9A1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2A0674E52FCABAED00D4FB39 /* Project object */;
 }

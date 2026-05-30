@@ -146,6 +146,17 @@ GolfOlympics/
 
 ---
 
+## Firebase設定ファイルの運用
+
+`GoogleService-Info.plist` はAPIキーを含む機密ファイルのため、Gitで管理しない。
+
+- **除外設定**：`GolfOlympicsiOSApp/.gitignore` に `GoogleService-Info.plist` を記載済み
+- **ファイルの場所**：`GolfOlympicsiOSApp/GolfOlympics/GoogleService-Info.plist`
+- **新しい環境でセットアップする場合**：[Firebaseコンソール](https://console.firebase.google.com/) からプロジェクトを選択し、`GoogleService-Info.plist` をダウンロードして上記パスに配置する
+- **チームで共有する場合**：1Password・Slack DM など安全な手段で共有する
+
+---
+
 ## プロトタイプ（React）のセットアップ手順
 
 ```bash
