@@ -18,10 +18,17 @@ struct ShareBannerView: View {
                     .tracking(2)
                     .foregroundStyle(Color.appGold.opacity(0.8))
                 ShareLink(item: shareURL, subject: Text("Golf Olympics")) {
-                    Image(systemName: "link.circle.fill")
-                        .font(.system(size: 34))
-                        .foregroundStyle(Color.appGold)
-                        .shadow(color: Color.appGold.opacity(0.4), radius: 8)
+                    VStack(spacing: 3) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 20, weight: .semibold))
+                        Text("共有")
+                            .font(.system(size: 10, weight: .bold))
+                    }
+                    .foregroundStyle(Color(red: 0.04, green: 0.09, blue: 0.16))
+                    .frame(width: 56, height: 44)
+                    .background(Color.appGold)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .shadow(color: Color.appGold.opacity(0.4), radius: 6)
                 }
             }
             .padding(.horizontal, 20)
