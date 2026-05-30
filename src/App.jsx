@@ -612,32 +612,6 @@ function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFi
         </button>
       </div>
 
-      <div style={styles.divider} />
-
-      {/* Diamond section */}
-      <SubTitle note="グリーン外からチップイン → +5pt・メダル対象外">💎 ダイヤモンド</SubTitle>
-      {players.map(p => (
-        <div key={p.id} style={styles.playerRow}>
-          <div style={styles.playerName}>{p.name}</div>
-          <button onClick={() => toggleDiamond(p.id)} style={specialBtn(!!diamonds[p.id], SPECIAL_CONFIG.diamond)}>
-            {SPECIAL_CONFIG.diamond.label}
-          </button>
-        </div>
-      ))}
-
-      <div style={styles.divider} />
-
-      {/* Saoichi section */}
-      <SubTitle note="ボールとカップの距離が旗竿より長い → 1パット成功時 +3pt">🚩 竿イチ権利</SubTitle>
-      {players.map(p => (
-        <div key={p.id} style={styles.playerRow}>
-          <div style={styles.playerName}>{p.name}</div>
-          <button onClick={() => toggleSaoichi(p.id)} style={specialBtn(!!saoichi[p.id], SPECIAL_CONFIG.saoichi)}>
-            {SPECIAL_CONFIG.saoichi.label}
-          </button>
-        </div>
-      ))}
-
       {/* Neapin section (short hole only) */}
       {isShort && (
         <>
@@ -656,46 +630,60 @@ function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFi
 
       <div style={styles.divider} />
 
-      {/* Medal section */}
-      <SubTitle note="1パットで決めたプレイヤーのメダルを選択（ダイヤ選択者は除外）">メダル割り当て</SubTitle>
-      {nonDiamondPlayers.length === 0 ? (
-        <p style={{ fontSize: "12px", color: "rgba(240,230,211,0.3)", marginBottom: "10px" }}>
-          全員ダイヤモンドのためメダルなし
-        </p>
-      ) : (
-        nonDiamondPlayers.map(player => (
-          <div key={player.id} style={styles.playerRow}>
-            <div style={styles.playerName}>{player.name}</div>
-            <div style={styles.medalBtns}>
-              {availableMedals.map(mk => {
-                const cfg = MEDAL_CONFIG[mk];
-                const selected = medals[player.id] === mk;
-                return (
-                  <button
-                    key={mk}
-                    onClick={() => selectMedal(player.id, mk)}
-                    style={{
-                      padding: "5px 8px",
-                      borderRadius: "7px",
-                      border: `1.5px solid ${selected ? cfg.border : "rgba(255,255,255,0.12)"}`,
-                      background: selected ? cfg.bg : "transparent",
-                      color: selected ? cfg.color : "rgba(240,230,211,0.5)",
-                      fontSize: "12px",
-                      cursor: "pointer",
-                      fontFamily: "Georgia, serif",
-                      transition: "all 0.15s",
-                      whiteSpace: "nowrap",
-                      fontWeight: selected ? "bold" : "normal",
-                    }}
-                  >
-                    {cfg.label}
-                  </button>
-                );
-              })}
+      {/* Combined: medal + diamond + saoichi per player */}
+      <SubTitle note="1パット→メダル選択 / チップイン→💎 / 旗竿より遠い→🚩">メダル割り当て</SubTitle>
+      {players.map(player => {
+        const isDiamond = !!diamonds[player.id];
+        const isSaoichi = !!saoichi[player.id];
+        return (
+          <div key={player.id} style={{ marginBottom: "14px", paddingBottom: "14px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+            <div style={{ fontSize: "13px", fontWeight: "bold", marginBottom: "7px" }}>{player.name}</div>
+            {/* Medal buttons */}
+            <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginBottom: "7px" }}>
+              {isDiamond ? (
+                <span style={{ fontSize: "12px", color: SPECIAL_CONFIG.diamond.color, fontStyle: "italic" }}>
+                  💎 ダイヤモンド（メダル対象外）
+                </span>
+              ) : (
+                availableMedals.map(mk => {
+                  const cfg = MEDAL_CONFIG[mk];
+                  const selected = medals[player.id] === mk;
+                  return (
+                    <button
+                      key={mk}
+                      onClick={() => selectMedal(player.id, mk)}
+                      style={{
+                        padding: "5px 8px",
+                        borderRadius: "7px",
+                        border: `1.5px solid ${selected ? cfg.border : "rgba(255,255,255,0.12)"}`,
+                        background: selected ? cfg.bg : "transparent",
+                        color: selected ? cfg.color : "rgba(240,230,211,0.5)",
+                        fontSize: "12px",
+                        cursor: "pointer",
+                        fontFamily: "Georgia, serif",
+                        transition: "all 0.15s",
+                        whiteSpace: "nowrap",
+                        fontWeight: selected ? "bold" : "normal",
+                      }}
+                    >
+                      {cfg.label}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+            {/* Diamond + Saoichi toggles */}
+            <div style={{ display: "flex", gap: "6px" }}>
+              <button onClick={() => toggleDiamond(player.id)} style={specialBtn(isDiamond, SPECIAL_CONFIG.diamond)}>
+                {SPECIAL_CONFIG.diamond.label}
+              </button>
+              <button onClick={() => toggleSaoichi(player.id)} style={specialBtn(isSaoichi, SPECIAL_CONFIG.saoichi)}>
+                {SPECIAL_CONFIG.saoichi.label}
+              </button>
             </div>
           </div>
-        ))
-      )}
+        );
+      })}
 
       {/* Mini scoreboard */}
       <div style={styles.miniScore}>
