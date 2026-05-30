@@ -15,11 +15,9 @@ struct HoleInputView: View {
     var onQuit: (() -> Void)?
 
     @State private var draft: HoleResult
-    @State private var showQuitAlert   = false
-    @State private var showHolePopup   = false
-    @State private var popupHoleNum    = 0
-    @State private var showTransLabel  = false
-    @State private var transLabelText  = ""
+    @State private var showQuitAlert = false
+    @State private var showHolePopup = false
+    @State private var popupHoleNum  = 0
 
     init(session: GameSession, roomId: String? = nil, onFinish: @escaping () -> Void, onHoleSaved: (() -> Void)? = nil, onQuit: (() -> Void)? = nil) {
         self.session = session
@@ -143,15 +141,6 @@ struct HoleInputView: View {
                 .padding(.vertical, 10)
                 .cardStyle()
 
-                // C: 遷移ラベル（ホール番号の変化を表示）
-                if showTransLabel {
-                    Text(transLabelText)
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundStyle(Color.appGold.opacity(0.85))
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
-                }
-
                 // ナビゲーションボタン
                 HStack(spacing: 10) {
                     if session.currentHole > 1 {
@@ -222,19 +211,10 @@ struct HoleInputView: View {
     }
 
     private func triggerHoleTransition(from: Int, to: Int) {
-        // C: ボタン付近ラベル
-        transLabelText = "H\(from) → H\(to)"
-        withAnimation(.easeOut(duration: 0.15)) { showTransLabel = true }
-
-        // B: 中央ポップアップ
         popupHoleNum = to
-        withAnimation(.spring(duration: 0.25)) { showHolePopup = true }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.1) {
-            withAnimation(.easeIn(duration: 0.25)) {
-                showHolePopup  = false
-                showTransLabel = false
-            }
+        withAnimation(.spring(duration: 0.2)) { showHolePopup = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation(.easeIn(duration: 0.2)) { showHolePopup = false }
         }
     }
 
