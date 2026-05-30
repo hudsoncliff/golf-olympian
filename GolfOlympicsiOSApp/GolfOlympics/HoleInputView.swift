@@ -75,9 +75,6 @@ struct HoleInputView: View {
                         }
                     }
 
-                    if let roomId {
-                        ShareButton(roomId: roomId)
-                    }
                 }
                 .padding(.vertical, 8)
                 .cardStyle()
@@ -148,6 +145,13 @@ struct HoleInputView: View {
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 40)
+        }
+        .overlay(alignment: .topTrailing) {
+            if let roomId {
+                ShareButton(roomId: roomId)
+                    .padding(.top, 12)
+                    .padding(.trailing, 20)
+            }
         }
         .alert("ゲームを中止しますか？", isPresented: $showQuitAlert) {
             Button("中止する", role: .destructive) { onQuit?() }
