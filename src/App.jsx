@@ -773,43 +773,38 @@ function RateModal({ players, scores, onClose }) {
           onChange={e => setRate(e.target.value)}
         />
 
-        <div style={styles.rateBox}>
-          <div style={{ fontSize: "11px", color: "rgba(240,230,211,0.4)", marginBottom: "10px", letterSpacing: "0.1em" }}>
-            ポイント集計
-          </div>
-          {players
-            .slice()
-            .sort((a, b) => scores[b.id] - scores[a.id])
-            .map(p => (
-              <div key={p.id} style={styles.rateRow}>
-                <span style={{ fontSize: "14px" }}>{p.name}</span>
-                <span style={{ color: "#F5A623", fontWeight: "bold" }}>{scores[p.id]}pt</span>
-              </div>
-            ))}
+        {/* 列ヘッダー */}
+        <div style={{ display: "flex", fontSize: "10px", color: "rgba(240,230,211,0.35)", marginBottom: "6px", padding: "0 4px" }}>
+          <span style={{ flex: 1 }} />
+          <span style={{ width: "38px", textAlign: "right" }}>獲得pt</span>
+          <span style={{ width: "18px" }} />
+          <span style={{ width: "42px", textAlign: "right" }}>精算pt</span>
+          {rateNum > 0 && <><span style={{ width: "18px" }} /><span style={{ width: "52px", textAlign: "right" }}>精算額</span></>}
         </div>
 
-        {rateNum > 0 && (
-          <div style={{ marginTop: "16px" }}>
-            <div style={{ fontSize: "11px", color: "rgba(240,230,211,0.4)", marginBottom: "10px", letterSpacing: "0.1em" }}>
-              精算金額
-            </div>
-            {diffs.sort((a, b) => b.diff - a.diff).map(p => (
-              <div key={p.id} style={{
-                ...styles.payRow,
-                background: p.diff > 0 ? "rgba(80,200,120,0.1)" : p.diff < 0 ? "rgba(220,80,80,0.1)" : "rgba(255,255,255,0.04)",
-              }}>
-                <span style={{ fontSize: "14px" }}>{p.name}</span>
-                <span style={{
-                  fontWeight: "bold",
-                  fontSize: "16px",
-                  color: p.diff > 0 ? "#50C878" : p.diff < 0 ? "#ff8a8a" : "rgba(240,230,211,0.4)",
-                }}>
-                  {p.diff > 0 ? `+${p.diff.toLocaleString()}円` : p.diff < 0 ? `${p.diff.toLocaleString()}円` : "±0円"}
-                </span>
+        {/* 合計pt → 精算pt → 精算額 一行表示 */}
+        {finals
+          .slice()
+          .sort((a, b) => b.finalScore - a.finalScore)
+          .map(p => {
+            const payment = p.finalScore * rateNum;
+            const fg = p.finalScore > 0 ? "#50C878" : p.finalScore < 0 ? "#ff8a8a" : "rgba(240,230,211,0.4)";
+            const bg = p.finalScore > 0 ? "rgba(80,200,120,0.1)" : p.finalScore < 0 ? "rgba(220,80,80,0.1)" : "rgba(255,255,255,0.04)";
+            const scoreLabel = p.finalScore > 0 ? `+${p.finalScore}pt` : p.finalScore < 0 ? `${p.finalScore}pt` : "±0pt";
+            const payLabel   = payment > 0 ? `+${payment.toLocaleString()}円` : payment < 0 ? `${payment.toLocaleString()}円` : "±0円";
+            return (
+              <div key={p.id} style={{ display: "flex", alignItems: "center", padding: "8px 10px", borderRadius: "8px", marginBottom: "6px", background: bg }}>
+                <span style={{ flex: 1, fontSize: "13px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
+                <span style={{ width: "38px", textAlign: "right", fontSize: "13px", fontWeight: "bold", color: "#F5A623" }}>{scores[p.id]}pt</span>
+                <span style={{ width: "18px", textAlign: "center", fontSize: "11px", color: "rgba(240,230,211,0.25)" }}>→</span>
+                <span style={{ width: "42px", textAlign: "right", fontSize: "13px", fontWeight: "bold", color: fg }}>{scoreLabel}</span>
+                {rateNum > 0 && <>
+                  <span style={{ width: "18px", textAlign: "center", fontSize: "11px", color: "rgba(240,230,211,0.25)" }}>→</span>
+                  <span style={{ width: "52px", textAlign: "right", fontSize: "13px", fontWeight: "bold", color: fg }}>{payLabel}</span>
+                </>}
               </div>
-            ))}
-          </div>
-        )}
+            );
+          })}
 
         <div style={{ marginTop: "20px" }} />
         <button style={{ ...styles.btn, ...styles.btnSecondary }} onClick={onClose}>
