@@ -1,0 +1,68 @@
+import Foundation
+
+struct HoleResult: Codable {
+    let holeNumber: Int
+    var medals:   [UUID: Medal]
+    var diamonds: Set<UUID>
+    var saoichi:  Set<UUID>
+    var neapin:   UUID?
+
+    init(holeNumber: Int) {
+        self.holeNumber = holeNumber
+        self.medals   = [:]
+        self.diamonds = []
+        self.saoichi  = []
+        self.neapin   = nil
+    }
+
+    // MARK: - Score
+
+    func points(for playerID: UUID) -> Int {
+        var pts = 0
+        if diamonds.contains(playerID) {
+            pts += 5
+        } else if let medal = medals[playerID] {
+            pts += medal.rawValue
+            if saoichi.contains(playerID) { pts += 3 }
+        }
+        if neapin == playerID { pts += 2 }
+        return pts
+    }
+
+    // ダイヤ取得者を除いた残りプレイヤー数に応じて使用可能メダルを決定
+    func availableMedals(playerCount: Int) -> [Medal] {
+        Medal.keys(for: playerCount - diamonds.count)
+    }
+
+    // MARK: - Mutations
+
+    mutating func selectMedal(_ medal: Medal, for playerID: UUID) {
+        let hadThis = medals[playerID] == medal
+        // 同じメダルを持つ全プレイヤーから除去（排他制御）
+        medals = medals.filter { $0.value != medal }
+        if !hadThis {
+            medals[playerID] = medal  // 再タップで解除、そうでなければ付与（既存メダルを上書き）
+        }
+    }
+
+    mutating func toggleDiamond(for playerID: UUID) {
+        if diamonds.contains(playerID) {
+            diamonds.remove(playerID)
+        } else {
+            diamonds.insert(playerID)
+            medals.removeValue(forKey: playerID)  // ダイヤON時はメダルを消去
+        }
+    }
+
+    mutating func toggleSaoichi(for playerID: UUID) {
+        if saoichi.contains(playerID) {
+            saoichi.remove(playerID)
+        } else {
+            saoichi.insert(playerID)
+        }
+    }
+
+    mutating func selectNeapin(for playerID: UUID) {
+        neapin = (neapin == playerID) ? nil : playerID  // ラジオ選択（1人のみ）
+    }
+}
