@@ -209,7 +209,7 @@ struct HoleInputView: View {
     private func triggerHoleTransition(from: Int, to: Int) {
         popupHoleNum = to
         withAnimation(.spring(duration: 0.2)) { showHolePopup = true }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             withAnimation(.easeIn(duration: 0.2)) { showHolePopup = false }
         }
     }
