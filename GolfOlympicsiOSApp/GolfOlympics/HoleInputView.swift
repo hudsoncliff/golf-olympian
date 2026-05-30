@@ -97,10 +97,6 @@ struct HoleInputView: View {
 
                 // プレイヤーごとのブロック
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("メダル割り当て")
-                        .sectionTitleStyle()
-                        .padding(.bottom, 12)
-
                     ForEach(Array(session.players.enumerated()), id: \.element.id) { idx, player in
                         PlayerHoleRow(
                             player: player,
