@@ -63,6 +63,18 @@ struct SettingsView: View {
                 }
                 .cardStyle()
 
+                // ルール説明
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("ルール説明")
+                        .sectionTitleStyle()
+
+                    RuleRow(icon: "🥇🥈🥉🔩", title: "メダル", desc: "グリーンオン後、ピンから遠い順に金〜鉄を割り当て。1パットで沈めたプレイヤーのみ点数を獲得。")
+                    RuleRow(icon: "💎", title: "ダイヤモンド", desc: "グリーン外からチップインした場合に選択。メダルとは排他で5pt（デフォルト）。")
+                    RuleRow(icon: "🚩", title: "竿イチ権", desc: "ボールとカップの距離が旗竿より長い場合に付与。1パット成功時にボーナスポイント加算。")
+                    RuleRow(icon: "📍", title: "ニアピン", desc: "グリーンオン後、カップに最も近いプレイヤーが獲得。1ホールにつき1人のみ。")
+                }
+                .cardStyle()
+
                 // 保存ボタン
                 Button("保存して戻る") {
                     AppSettings.userName    = userName
@@ -76,6 +88,28 @@ struct SettingsView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 40)
         }
+    }
+}
+
+struct RuleRow: View {
+    let icon: String
+    let title: String
+    let desc: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                Text(icon).font(.system(size: 14))
+                Text(title)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.appGold)
+            }
+            Text(desc)
+                .font(.system(size: 12))
+                .foregroundStyle(Color.white.opacity(0.55))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        Divider().opacity(0.1)
     }
 }
 

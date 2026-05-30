@@ -36,45 +36,56 @@ struct HoleInputView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                AppHeader()
+                // コンパクトなホールヘッダー（ホール番号 + プログレスバー + 共有ボタン）
+                HStack(spacing: 14) {
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("HOLE")
+                            .font(.system(size: 9, weight: .semibold))
+                            .tracking(3)
+                            .foregroundStyle(Color.white.opacity(0.35))
+                        Text("\(session.currentHole)")
+                            .font(.system(size: 30, weight: .bold))
+                            .foregroundStyle(Color.appGold)
+                            .lineLimit(1)
+                    }
+                    .frame(width: 52, alignment: .leading)
 
-                // ホール番号・プログレスバー
-                VStack(spacing: 8) {
-                    Text("\(session.currentHole)")
-                        .font(.system(size: 52, weight: .bold))
-                        .foregroundStyle(Color.appGold)
-                    Text("HOLE / 18")
-                        .font(.system(size: 11))
-                        .tracking(4)
-                        .foregroundStyle(Color.white.opacity(0.5))
+                    VStack(spacing: 5) {
+                        GeometryReader { geo in
+                            ZStack(alignment: .leading) {
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(Color.white.opacity(0.1))
+                                    .frame(height: 4)
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(Color.appGold)
+                                    .frame(
+                                        width: geo.size.width * CGFloat(session.currentHole) / 18,
+                                        height: 4
+                                    )
+                                    .animation(.easeInOut(duration: 0.4), value: session.currentHole)
+                            }
+                        }
+                        .frame(height: 4)
 
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: 2)
-                                .fill(Color.white.opacity(0.1))
-                                .frame(height: 4)
-                            RoundedRectangle(cornerRadius: 2)
-                                .fill(Color.appGold)
-                                .frame(
-                                    width: geo.size.width * CGFloat(session.currentHole) / 18,
-                                    height: 4
-                                )
-                                .animation(.easeInOut(duration: 0.4), value: session.currentHole)
+                        HStack {
+                            Spacer()
+                            Text("\(session.currentHole) / 18")
+                                .font(.system(size: 11))
+                                .foregroundStyle(Color.white.opacity(0.35))
                         }
                     }
-                    .frame(height: 4)
+
+                    if let roomId {
+                        ShareButton(roomId: roomId)
+                    }
                 }
-                .padding(.vertical, 4)
+                .padding(.vertical, 8)
                 .cardStyle()
 
                 // プレイヤーごとのブロック
                 VStack(alignment: .leading, spacing: 0) {
                     Text("メダル割り当て")
                         .sectionTitleStyle()
-                        .padding(.bottom, 4)
-                    Text("1パット→メダル / チップイン→💎 / 旗竿より遠い→🚩 / ニアピン→📍")
-                        .font(.system(size: 10))
-                        .foregroundStyle(Color.white.opacity(0.35))
                         .padding(.bottom, 12)
 
                     ForEach(Array(session.players.enumerated()), id: \.element.id) { idx, player in
@@ -137,13 +148,6 @@ struct HoleInputView: View {
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 40)
-        }
-        .overlay(alignment: .topTrailing) {
-            if let roomId {
-                ShareButton(roomId: roomId)
-                    .padding(.top, 12)
-                    .padding(.trailing, 20)
-            }
         }
         .alert("ゲームを中止しますか？", isPresented: $showQuitAlert) {
             Button("中止する", role: .destructive) { onQuit?() }
