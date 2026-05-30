@@ -171,16 +171,17 @@ struct SpecialToggleStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 12, weight: isSelected ? .bold : .regular))
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(isSelected ? color.opacity(0.15) : Color.clear)
-            .foregroundStyle(isSelected ? color : Color.white.opacity(0.4))
-            .clipShape(RoundedRectangle(cornerRadius: 7))
+            .font(.system(size: 13, weight: isSelected ? .bold : .regular))
+            .padding(.horizontal, 13)
+            .padding(.vertical, 9)
+            .background(isSelected ? color : Color.white.opacity(0.05))
+            .foregroundStyle(isSelected ? Color.white : Color.white.opacity(0.4))
+            .clipShape(RoundedRectangle(cornerRadius: 9))
             .overlay(
-                RoundedRectangle(cornerRadius: 7)
-                    .stroke(isSelected ? color : Color.white.opacity(0.12), lineWidth: 1.5)
+                RoundedRectangle(cornerRadius: 9)
+                    .stroke(isSelected ? color : Color.white.opacity(0.12), lineWidth: isSelected ? 2 : 1)
             )
+            .shadow(color: isSelected ? color.opacity(0.55) : .clear, radius: 8, x: 0, y: 2)
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
             .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
@@ -192,16 +193,17 @@ struct MedalButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 12, weight: selected ? .bold : .regular))
-            .padding(.horizontal, 8)
-            .padding(.vertical, 5)
-            .background(selected ? color.opacity(0.15) : Color.clear)
-            .foregroundStyle(selected ? color : Color.white.opacity(0.5))
-            .clipShape(RoundedRectangle(cornerRadius: 7))
+            .font(.system(size: 13, weight: selected ? .bold : .regular))
+            .padding(.horizontal, 13)
+            .padding(.vertical, 9)
+            .background(selected ? color : Color.white.opacity(0.05))
+            .foregroundStyle(selected ? Color.white : Color.white.opacity(0.5))
+            .clipShape(RoundedRectangle(cornerRadius: 9))
             .overlay(
-                RoundedRectangle(cornerRadius: 7)
-                    .stroke(selected ? color : Color.white.opacity(0.12), lineWidth: 1.5)
+                RoundedRectangle(cornerRadius: 9)
+                    .stroke(selected ? color : Color.white.opacity(0.12), lineWidth: selected ? 2 : 1)
             )
+            .shadow(color: selected ? color.opacity(0.55) : .clear, radius: 8, x: 0, y: 2)
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
             .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }

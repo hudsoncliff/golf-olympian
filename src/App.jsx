@@ -11,10 +11,10 @@ function generateRoomId() {
 }
 
 const MEDAL_CONFIG = {
-  gold:   { label: "🥇 金", points: 4, color: "#F5A623", bg: "#FFF8E7", border: "#F5A623" },
-  silver: { label: "🥈 銀", points: 3, color: "#9B9B9B", bg: "#F5F5F5", border: "#9B9B9B" },
-  bronze: { label: "🥉 銅", points: 2, color: "#C47B2B", bg: "#FDF1E7", border: "#C47B2B" },
-  iron:   { label: "🔩 鉄", points: 1, color: "#607D8B", bg: "#ECEFF1", border: "#607D8B" },
+  gold:   { label: "🥇 金", points: 4, color: "#F5A623", bg: "#F5A623", border: "#F5A623" },
+  silver: { label: "🥈 銀", points: 3, color: "#9B9B9B", bg: "#9B9B9B", border: "#9B9B9B" },
+  bronze: { label: "🥉 銅", points: 2, color: "#C47B2B", bg: "#C47B2B", border: "#C47B2B" },
+  iron:   { label: "🔩 鉄", points: 1, color: "#607D8B", bg: "#607D8B", border: "#607D8B" },
 };
 
 const SPECIAL_CONFIG = {
@@ -313,17 +313,18 @@ const styles = {
 
 function specialBtn(selected, cfg) {
   return {
-    padding: "5px 12px",
-    borderRadius: "7px",
-    border: `1.5px solid ${selected ? cfg.border : "rgba(255,255,255,0.12)"}`,
+    padding: "8px 13px",
+    borderRadius: "9px",
+    border: `${selected ? 2 : 1}px solid ${selected ? cfg.border : "rgba(255,255,255,0.12)"}`,
     background: selected ? cfg.bg : "transparent",
-    color: selected ? cfg.color : "rgba(240,230,211,0.4)",
-    fontSize: "12px",
+    color: selected ? "#fff" : "rgba(240,230,211,0.4)",
+    fontSize: "13px",
     cursor: "pointer",
     fontFamily: "Georgia, serif",
     transition: "all 0.15s",
     fontWeight: selected ? "bold" : "normal",
     whiteSpace: "nowrap",
+    boxShadow: selected ? `0 2px 10px ${cfg.border}88` : "none",
   };
 }
 
@@ -635,17 +636,18 @@ function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFi
                       key={mk}
                       onClick={() => selectMedal(player.id, mk)}
                       style={{
-                        padding: "5px 8px",
-                        borderRadius: "7px",
-                        border: `1.5px solid ${selected ? cfg.border : "rgba(255,255,255,0.12)"}`,
+                        padding: "8px 13px",
+                        borderRadius: "9px",
+                        border: `${selected ? 2 : 1}px solid ${selected ? cfg.border : "rgba(255,255,255,0.12)"}`,
                         background: selected ? cfg.bg : "transparent",
-                        color: selected ? cfg.color : "rgba(240,230,211,0.5)",
-                        fontSize: "12px",
+                        color: selected ? "#fff" : "rgba(240,230,211,0.5)",
+                        fontSize: "13px",
                         cursor: "pointer",
                         fontFamily: "Georgia, serif",
                         transition: "all 0.15s",
                         whiteSpace: "nowrap",
                         fontWeight: selected ? "bold" : "normal",
+                        boxShadow: selected ? `0 2px 10px ${cfg.border}88` : "none",
                       }}
                     >
                       {cfg.label}
