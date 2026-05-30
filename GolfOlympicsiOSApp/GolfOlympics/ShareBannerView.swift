@@ -10,19 +10,23 @@ struct ShareBannerView: View {
 
     var body: some View {
         if collapsed {
-            HStack {
+            // 折りたたみ状態：ルームコード + 共有ボタン
+            HStack(spacing: 10) {
                 Spacer()
-                ShareLink(item: shareURL,
-                          subject: Text("Golf Olympics"),
-                          message: Text("ルームコード: \(roomId)")) {
+                Text(roomId)
+                    .font(.system(size: 13, weight: .bold, design: .monospaced))
+                    .tracking(2)
+                    .foregroundStyle(Color.appGold.opacity(0.8))
+                ShareLink(item: shareURL, subject: Text("Golf Olympics")) {
                     Image(systemName: "link.circle.fill")
-                        .font(.system(size: 36))
+                        .font(.system(size: 34))
                         .foregroundStyle(Color.appGold)
                         .shadow(color: Color.appGold.opacity(0.4), radius: 8)
                 }
             }
             .padding(.horizontal, 20)
         } else {
+            // 展開状態：バナー表示
             VStack(spacing: 12) {
                 Text("📱 参加者に共有する")
                     .sectionTitleStyle()
@@ -33,9 +37,7 @@ struct ShareBannerView: View {
                     .tracking(8)
                     .foregroundStyle(Color.appGold)
 
-                ShareLink(item: shareURL,
-                          subject: Text("Golf Olympics"),
-                          message: Text("ルームコード: \(roomId)")) {
+                ShareLink(item: shareURL, subject: Text("Golf Olympics")) {
                     Label("このゲームを共有", systemImage: "square.and.arrow.up")
                         .font(.system(size: 15, weight: .bold))
                         .frame(maxWidth: .infinity)
