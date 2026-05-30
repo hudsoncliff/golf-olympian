@@ -37,13 +37,6 @@ struct HoleInputView: View {
         ScrollView {
             VStack(spacing: 16) {
                 AppHeader()
-                    .overlay(alignment: .topTrailing) {
-                        if let roomId {
-                            ShareButton(roomId: roomId)
-                                .padding(.top, 8)
-                                .padding(.trailing, 4)
-                        }
-                    }
 
                 // ホール番号・プログレスバー
                 VStack(spacing: 8) {
@@ -144,6 +137,13 @@ struct HoleInputView: View {
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 40)
+        }
+        .overlay(alignment: .topTrailing) {
+            if let roomId {
+                ShareButton(roomId: roomId)
+                    .padding(.top, 12)
+                    .padding(.trailing, 20)
+            }
         }
         .alert("ゲームを中止しますか？", isPresented: $showQuitAlert) {
             Button("中止する", role: .destructive) { onQuit?() }
