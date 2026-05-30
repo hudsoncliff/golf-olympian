@@ -548,6 +548,12 @@ function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFi
       } else {
         nextDiamonds[pid] = true;
         delete nextMedals[pid];
+        // ダイヤ追加で使用可能メダルが1つ減るため、範囲外になったメダルを除去
+        const remaining = players.length - Object.keys(nextDiamonds).length;
+        const validMedals = new Set(getMedalKeysForCount(remaining));
+        Object.keys(nextMedals).forEach(id => {
+          if (!validMedals.has(nextMedals[id])) delete nextMedals[id];
+        });
       }
       return { ...prev, diamonds: nextDiamonds, medals: nextMedals };
     });

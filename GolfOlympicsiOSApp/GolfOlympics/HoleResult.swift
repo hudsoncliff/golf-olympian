@@ -45,12 +45,15 @@ struct HoleResult: Codable {
         }
     }
 
-    mutating func toggleDiamond(for playerID: UUID) {
+    mutating func toggleDiamond(for playerID: UUID, playerCount: Int) {
         if diamonds.contains(playerID) {
             diamonds.remove(playerID)
         } else {
             diamonds.insert(playerID)
-            medals.removeValue(forKey: playerID)  // ダイヤON時はメダルを消去
+            medals.removeValue(forKey: playerID)
+            // ダイヤ追加で使用可能メダルが1つ減るため、範囲外になったメダルを他プレイヤーからも除去
+            let valid = Set(availableMedals(playerCount: playerCount))
+            medals = medals.filter { valid.contains($0.value) }
         }
     }
 

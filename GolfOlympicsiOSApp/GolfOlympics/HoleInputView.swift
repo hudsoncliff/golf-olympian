@@ -92,7 +92,7 @@ struct HoleInputView: View {
                             isSaoichi:   draft.saoichi.contains(player.id),
                             isNeapin:    draft.neapin == player.id,
                             currentMedal: draft.medals[player.id],
-                            onToggleDiamond: { draft.toggleDiamond(for: player.id) },
+                            onToggleDiamond: { draft.toggleDiamond(for: player.id, playerCount: session.players.count) },
                             onToggleSaoichi: { draft.toggleSaoichi(for: player.id) },
                             onToggleNeapin:  { draft.selectNeapin(for: player.id) },
                             onSelectMedal:   { medal in draft.selectMedal(medal, for: player.id) }
