@@ -15,7 +15,11 @@ struct HoleInputView: View {
     var onQuit: (() -> Void)?
 
     @State private var draft: HoleResult
-    @State private var showQuitAlert = false
+    @State private var showQuitAlert   = false
+    @State private var showHolePopup   = false
+    @State private var popupHoleNum    = 0
+    @State private var showTransLabel  = false
+    @State private var transLabelText  = ""
 
     init(session: GameSession, roomId: String? = nil, onFinish: @escaping () -> Void, onHoleSaved: (() -> Void)? = nil, onQuit: (() -> Void)? = nil) {
         self.session = session
@@ -139,6 +143,15 @@ struct HoleInputView: View {
                 .padding(.vertical, 10)
                 .cardStyle()
 
+                // C: 遷移ラベル（ホール番号の変化を表示）
+                if showTransLabel {
+                    Text(transLabelText)
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(Color.appGold.opacity(0.85))
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                }
+
                 // ナビゲーションボタン
                 HStack(spacing: 10) {
                     if session.currentHole > 1 {
@@ -160,6 +173,30 @@ struct HoleInputView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 40)
         }
+        // B: ホール番号中央ポップアップ
+        .overlay {
+            if showHolePopup {
+                ZStack {
+                    Color.black.opacity(0.45)
+                        .ignoresSafeArea()
+                        .allowsHitTesting(false)
+                    VStack(spacing: 4) {
+                        Text("HOLE")
+                            .font(.system(size: 13, weight: .semibold))
+                            .tracking(8)
+                            .foregroundStyle(Color.white.opacity(0.5))
+                        Text("\(popupHoleNum)")
+                            .font(.system(size: 88, weight: .bold))
+                            .foregroundStyle(Color.appGold)
+                            .shadow(color: Color.appGold.opacity(0.6), radius: 24)
+                    }
+                    .transition(.asymmetric(
+                        insertion: .scale(scale: 0.6).combined(with: .opacity),
+                        removal:   .scale(scale: 1.2).combined(with: .opacity)
+                    ))
+                }
+            }
+        }
         .overlay(alignment: .topTrailing) {
             if let roomId {
                 ShareButton(roomId: roomId)
@@ -176,10 +213,29 @@ struct HoleInputView: View {
     }
 
     private func saveAndMove(_ delta: Int) {
+        let from = session.currentHole
         session.holeResults[session.currentHole - 1] = draft
         session.currentHole += delta
         draft = session.holeResults[session.currentHole - 1]
         onHoleSaved?()
+        triggerHoleTransition(from: from, to: session.currentHole)
+    }
+
+    private func triggerHoleTransition(from: Int, to: Int) {
+        // C: ボタン付近ラベル
+        transLabelText = "H\(from) → H\(to)"
+        withAnimation(.easeOut(duration: 0.15)) { showTransLabel = true }
+
+        // B: 中央ポップアップ
+        popupHoleNum = to
+        withAnimation(.spring(duration: 0.25)) { showHolePopup = true }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.1) {
+            withAnimation(.easeIn(duration: 0.25)) {
+                showHolePopup  = false
+                showTransLabel = false
+            }
+        }
     }
 
     private func saveAndFinish() {
