@@ -528,10 +528,11 @@ function StartView({ onStart, onJoin }) {
 }
 
 // ── HoleInputView ──────────────────────────────────────────────
-function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFinish }) {
+function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFinish, onAbort }) {
   const saved = holeResults[currentHole - 1];
   const [holeData, setHoleData] = useState(() => normalizeHoleResult(saved));
 
+  const [confirmAbort, setConfirmAbort] = useState(false);
   const { medals, diamonds, saoichi, neapin, isShort } = holeData;
 
   const nonDiamondPlayers = players.filter(p => !diamonds[p.id]);
@@ -721,6 +722,41 @@ function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFi
           {isLast ? "結果を見る 🏆" : "次のホールへ →"}
         </button>
       </div>
+
+      {!confirmAbort ? (
+        <button
+          style={{ ...styles.btn, ...styles.btnDanger, marginTop: "12px", fontSize: "13px", padding: "10px" }}
+          onClick={() => setConfirmAbort(true)}
+        >
+          ✕ ゲームを中止してトップへ戻る
+        </button>
+      ) : (
+        <div style={{
+          marginTop: "12px",
+          background: "rgba(220,80,80,0.1)",
+          border: "1px solid rgba(220,80,80,0.3)",
+          borderRadius: "10px",
+          padding: "12px",
+        }}>
+          <p style={{ fontSize: "13px", color: "#ff8a8a", textAlign: "center", margin: "0 0 10px" }}>
+            スコアデータはすべて消えます。本当に中止しますか？
+          </p>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              style={{ ...styles.btn, ...styles.btnSecondary, flex: 1, fontSize: "13px", padding: "10px" }}
+              onClick={() => setConfirmAbort(false)}
+            >
+              続ける
+            </button>
+            <button
+              style={{ ...styles.btn, ...styles.btnDanger, flex: 1, fontSize: "13px", padding: "10px" }}
+              onClick={onAbort}
+            >
+              中止する
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1050,6 +1086,7 @@ export default function App() {
             onSave={handleSave}
             onPrev={handlePrev}
             onFinish={handleFinish}
+            onAbort={handleNewGame}
           />
         </>
       )}
