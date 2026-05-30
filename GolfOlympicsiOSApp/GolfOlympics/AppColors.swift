@@ -32,7 +32,7 @@ struct AppBackground: View {
 struct AppHeader: View {
     var body: some View {
         VStack(spacing: 4) {
-            Text("⛳ GOLF OLYMPICS")
+            Text("🍙 ONIGIRI")
                 .font(.system(size: 22, weight: .bold))
                 .tracking(4)
                 .foregroundStyle(Color.appGold)

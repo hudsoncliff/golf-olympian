@@ -53,7 +53,7 @@ struct ShareModalView: View {
                         .foregroundStyle(Color.appGold)
                 }
 
-                ShareLink(item: shareURL, subject: Text("Golf Olympics")) {
+                ShareLink(item: shareURL, subject: Text("ONIGIRI")) {
                     Label("このゲームを共有", systemImage: "square.and.arrow.up")
                         .font(.system(size: 15, weight: .bold))
                         .frame(maxWidth: .infinity)
