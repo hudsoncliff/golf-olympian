@@ -1,5 +1,12 @@
 import SwiftUI
 
+private extension VerticalAlignment {
+    private enum ProgressBarCenter: AlignmentID {
+        static func defaultValue(in d: ViewDimensions) -> CGFloat { d[VerticalAlignment.center] }
+    }
+    static let progressBarCenter = VerticalAlignment(ProgressBarCenter.self)
+}
+
 struct HoleInputView: View {
     var session: GameSession
     var roomId: String?
@@ -37,8 +44,8 @@ struct HoleInputView: View {
         ScrollView {
             VStack(spacing: 16) {
                 // コンパクトなホールヘッダー（ホール番号 + プログレスバー + 共有ボタン）
-                HStack(spacing: 14) {
-                    VStack(alignment: .leading, spacing: 1) {
+                HStack(alignment: .progressBarCenter, spacing: 14) {
+                    VStack(alignment: .center, spacing: 1) {
                         Text("HOLE")
                             .font(.system(size: 9, weight: .semibold))
                             .tracking(3)
@@ -48,7 +55,8 @@ struct HoleInputView: View {
                             .foregroundStyle(Color.appGold)
                             .lineLimit(1)
                     }
-                    .frame(width: 52, alignment: .leading)
+                    .frame(width: 52, alignment: .center)
+                    .alignmentGuide(.progressBarCenter) { d in d[VerticalAlignment.center] }
 
                     VStack(spacing: 5) {
                         GeometryReader { geo in
@@ -66,6 +74,7 @@ struct HoleInputView: View {
                             }
                         }
                         .frame(height: 4)
+                        .alignmentGuide(.progressBarCenter) { d in d[VerticalAlignment.center] }
 
                         HStack {
                             Spacer()
@@ -154,7 +163,7 @@ struct HoleInputView: View {
         .overlay(alignment: .topTrailing) {
             if let roomId {
                 ShareButton(roomId: roomId)
-                    .padding(.top, 12)
+                    .padding(.top, 0)
                     .padding(.trailing, 20)
             }
         }
