@@ -856,7 +856,7 @@ function ResultView({ players, holeResults, onEdit, onNewGame }) {
         {/* ホール別詳細 */}
         <details style={{ marginTop: "20px" }}>
           <summary style={{ fontSize: "12px", color: "rgba(240,230,211,0.5)", cursor: "pointer", letterSpacing: "0.1em" }}>
-            ホール別スコアを見る
+            ホール別点数を見る
           </summary>
           <div style={{ marginTop: "12px", overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px" }}>
@@ -876,20 +876,21 @@ function ResultView({ players, holeResults, onEdit, onNewGame }) {
                     </td>
                     {players.map(p => {
                       const { medals: hm = {}, diamonds: hd = {}, saoichi: hs = {}, neapin: hn } = h;
-                      let display = "ー";
+                      const pts = calcHolePoints(p.id, h);
+                      let icons = "";
                       let color = "rgba(255,255,255,0.2)";
                       if (hd[p.id]) {
-                        display = "💎";
+                        icons = "💎";
                         color = SPECIAL_CONFIG.diamond.color;
                       } else if (hm[p.id]) {
                         const cfg = MEDAL_CONFIG[hm[p.id]];
-                        display = cfg.label.split(" ")[0] + (hs[p.id] ? "🚩" : "");
+                        icons = cfg.label.split(" ")[0] + (hs[p.id] ? "🚩" : "");
                         color = cfg.color;
                       }
-                      if (hn === p.id) display += "📍";
+                      if (hn === p.id) icons += "📍";
                       return (
                         <td key={p.id} style={{ textAlign: "center", padding: "3px 6px", color }}>
-                          {display}
+                          {pts === 0 ? "ー" : <>{pts}pt {icons}</>}
                         </td>
                       );
                     })}
