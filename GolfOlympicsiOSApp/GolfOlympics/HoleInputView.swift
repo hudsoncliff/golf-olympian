@@ -4,13 +4,16 @@ struct HoleInputView: View {
     var session: GameSession
     var onFinish: () -> Void
     var onHoleSaved: (() -> Void)?
+    var onQuit: (() -> Void)?
 
     @State private var draft: HoleResult
+    @State private var showQuitAlert = false
 
-    init(session: GameSession, onFinish: @escaping () -> Void, onHoleSaved: (() -> Void)? = nil) {
+    init(session: GameSession, onFinish: @escaping () -> Void, onHoleSaved: (() -> Void)? = nil, onQuit: (() -> Void)? = nil) {
         self.session = session
         self.onFinish = onFinish
         self.onHoleSaved = onHoleSaved
+        self.onQuit = onQuit
         let idx = max(0, min(session.currentHole - 1, 17))
         self._draft = State(initialValue: session.holeResults[idx])
     }
@@ -123,9 +126,21 @@ struct HoleInputView: View {
                     }
                     .buttonStyle(PrimaryButtonStyle())
                 }
+
+                // 中止ボタン
+                if onQuit != nil {
+                    Button("✕ ゲームを中止する") { showQuitAlert = true }
+                        .buttonStyle(DangerButtonStyle())
+                }
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 40)
+        }
+        .alert("ゲームを中止しますか？", isPresented: $showQuitAlert) {
+            Button("中止する", role: .destructive) { onQuit?() }
+            Button("キャンセル", role: .cancel) {}
+        } message: {
+            Text("スコアは保存されません。")
         }
     }
 
