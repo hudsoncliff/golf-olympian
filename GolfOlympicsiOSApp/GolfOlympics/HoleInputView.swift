@@ -29,7 +29,7 @@ struct HoleInputView: View {
     private func prevTotal(for playerID: UUID) -> Int {
         session.holeResults.enumerated().reduce(0) { sum, pair in
             guard pair.offset != session.currentHole - 1 else { return sum }
-            return sum + pair.element.points(for: playerID)
+            return sum + pair.element.points(for: playerID, config: session.pointConfig)
         }
     }
 

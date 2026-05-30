@@ -3,7 +3,10 @@ import SwiftUI
 struct RateSheet: View {
     var session: GameSession
     @Environment(\.dismiss) private var dismiss
-    @State private var rateText = ""
+    @State private var rateText: String = {
+        let r = AppSettings.defaultRate
+        return r > 0 ? "\(r)" : ""
+    }()
 
     private var rate: Int { Int(rateText.filter(\.isNumber)) ?? 0 }
 

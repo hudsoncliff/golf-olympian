@@ -17,15 +17,15 @@ struct HoleResult: Codable {
 
     // MARK: - Score
 
-    func points(for playerID: UUID) -> Int {
+    func points(for playerID: UUID, config: PointConfig = PointConfig()) -> Int {
         var pts = 0
         if diamonds.contains(playerID) {
-            pts += 5
+            pts += config.diamond
         } else if let medal = medals[playerID] {
-            pts += medal.rawValue
-            if saoichi.contains(playerID) { pts += 3 }
+            pts += config.medalPoints(medal)
+            if saoichi.contains(playerID) { pts += config.saoichiBonus }
         }
-        if neapin == playerID { pts += 2 }
+        if neapin == playerID { pts += config.neapin }
         return pts
     }
 
