@@ -27,7 +27,37 @@ struct AppBackground: View {
     }
 }
 
-// MARK: - Header
+// MARK: - Screen Header（戻る矢印 + タイトル）
+
+struct ScreenHeader: View {
+    let title: String
+    var onBack: (() -> Void)? = nil
+
+    var body: some View {
+        HStack {
+            if let onBack {
+                Button { onBack() } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(Color.white)
+                }
+                .frame(width: 28)
+            } else {
+                Color.clear.frame(width: 28, height: 1)
+            }
+            Spacer()
+            Text(title)
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(Color.white)
+            Spacer()
+            Color.clear.frame(width: 28, height: 1)
+        }
+        .padding(.top, 16)
+        .padding(.bottom, 4)
+    }
+}
+
+// MARK: - App Header（ホーム・結果画面のタイトル）
 
 struct AppHeader: View {
     var body: some View {

@@ -11,7 +11,13 @@ struct SettingsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                AppHeader()
+                ScreenHeader(title: "設定") {
+                    AppSettings.userName     = userName
+                    AppSettings.defaultRate  = defaultRate
+                    AppSettings.currencyUnit = currencyUnit.isEmpty ? "円" : currencyUnit
+                    AppSettings.pointConfig  = config
+                    onBack()
+                }
 
                 // ユーザー情報
                 VStack(alignment: .leading, spacing: 14) {
@@ -89,16 +95,6 @@ struct SettingsView: View {
                 }
                 .cardStyle()
 
-                // 保存ボタン
-                Button("保存して戻る") {
-                    AppSettings.userName     = userName
-                    AppSettings.defaultRate  = defaultRate
-                    AppSettings.currencyUnit = currencyUnit.isEmpty ? "円" : currencyUnit
-                    AppSettings.pointConfig  = config
-                    onBack()
-                }
-                .buttonStyle(PrimaryButtonStyle())
-                .padding(.horizontal, 0)
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 40)

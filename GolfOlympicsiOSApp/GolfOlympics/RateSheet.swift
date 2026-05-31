@@ -17,21 +17,7 @@ struct RateView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                // ヘッダー（矢印のみ・白）
-                HStack {
-                    Button { onBack() } label: {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(Color.white)
-                    }
-                    Spacer()
-                    Text("💴 レート計算")
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundStyle(Color.white)
-                    Spacer()
-                    Color.clear.frame(width: 28, height: 1)
-                }
-                .padding(.top, 16)
+                ScreenHeader(title: "💴 レート計算", onBack: onBack)
 
                 // レート入力
                 VStack(alignment: .leading, spacing: 8) {
