@@ -1,4 +1,17 @@
 import SwiftUI
+import SafariServices
+
+// MARK: - Safari WebView
+
+struct SafariView: UIViewControllerRepresentable {
+    let url: URL
+    func makeUIViewController(context: Context) -> SFSafariViewController {
+        SFSafariViewController(url: url)
+    }
+    func updateUIViewController(_ vc: SFSafariViewController, context: Context) {}
+}
+
+// MARK: - SettingsView
 
 struct SettingsView: View {
     var onBack: () -> Void
@@ -7,6 +20,9 @@ struct SettingsView: View {
     @State private var defaultRate   = AppSettings.defaultRate
     @State private var currencyUnit  = AppSettings.currencyUnit
     @State private var config        = AppSettings.pointConfig
+    @State private var showPrivacy   = false
+
+    private let privacyURL = URL(string: "https://hudsoncliff.github.io/golf-olympian/privacy-policy.html")!
 
     var body: some View {
         ScrollView {
@@ -99,9 +115,36 @@ struct SettingsView: View {
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .padding(.horizontal, 0)
+
+                // プライバシーポリシー
+                Button {
+                    showPrivacy = true
+                } label: {
+                    HStack {
+                        Text("プライバシーポリシー")
+                            .font(.system(size: 14))
+                            .foregroundStyle(Color.white.opacity(0.7))
+                        Spacer()
+                        Image(systemName: "arrow.up.right.square")
+                            .font(.system(size: 13))
+                            .foregroundStyle(Color.white.opacity(0.35))
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(Color.white.opacity(0.05))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                    )
+                }
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 40)
+        }
+        .sheet(isPresented: $showPrivacy) {
+            SafariView(url: privacyURL)
+                .ignoresSafeArea()
         }
     }
 }
