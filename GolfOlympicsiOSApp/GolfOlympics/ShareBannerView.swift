@@ -51,7 +51,7 @@ struct ShareButton: View {
         }
         .sheet(isPresented: $showSheet) {
             ShareModalView(roomId: roomId)
-                .presentationDetents([.large])
+                .presentationDetents([.medium])
         }
     }
 }
