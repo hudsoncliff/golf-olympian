@@ -68,7 +68,7 @@ struct AppHeader: View {
                 .foregroundStyle(Color.appGold)
                 .shadow(color: Color.black.opacity(0.5), radius: 4, x: 0, y: 2)
                 .shadow(color: Color.appGold.opacity(0.3), radius: 10)
-            Text("SCORE TRACKER")
+            Text("OLYMPIC SCORING")
                 .font(.system(size: 10))
                 .tracking(6)
                 .foregroundStyle(Color.white.opacity(0.85))
