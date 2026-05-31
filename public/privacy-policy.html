@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>プライバシーポリシー — ONIGIRI</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      background: linear-gradient(180deg, #59b3e0 0%, #2179b7 30%, #1a7d47 55%, #0d4a1f 80%);
+      min-height: 100vh;
+      color: #f0e6d3;
+      padding: 40px 20px 60px;
+    }
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      background: rgba(2, 7, 18, 0.82);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 40px 32px;
+    }
+    .app-name {
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 0.2em;
+      color: #F5A623;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    .subtitle {
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      color: rgba(240,230,211,0.5);
+      text-align: center;
+      text-transform: uppercase;
+      margin-bottom: 36px;
+    }
+    h1 {
+      font-size: 20px;
+      font-weight: bold;
+      color: #fff;
+      border-bottom: 1px solid rgba(245,166,35,0.3);
+      padding-bottom: 12px;
+      margin-bottom: 24px;
+    }
+    h2 {
+      font-size: 14px;
+      font-weight: bold;
+      color: #F5A623;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin: 28px 0 10px;
+    }
+    p, li {
+      font-size: 14px;
+      line-height: 1.8;
+      color: rgba(240,230,211,0.85);
+    }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 4px; }
+    a { color: #F5A623; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .updated {
+      font-size: 12px;
+      color: rgba(240,230,211,0.4);
+      text-align: right;
+      margin-top: 36px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <p class="app-name">🍙 ONIGIRI</p>
+    <p class="subtitle">Score Tracker</p>
+
+    <h1>プライバシーポリシー</h1>
+
+    <p>
+      本アプリ「ONIGIRI」（以下「本アプリ」）は、ゴルフのスコア管理を目的としたアプリです。
+      本ポリシーでは、本アプリが取り扱う情報について説明します。
+    </p>
+
+    <h2>収集する情報</h2>
+    <p>本アプリが収集・利用する情報は以下のとおりです。</p>
+    <ul>
+      <li><strong>ニックネーム</strong>：設定画面で任意入力。端末内にのみ保存されます。</li>
+      <li><strong>ゲームスコアデータ</strong>：リアルタイム共有機能を使用した場合に限り、Firebase Realtime Database に一時的に保存されます。ゲーム終了後に削除されます。</li>
+      <li><strong>アプリ設定</strong>（デフォルトレート・通貨単位・ポイント設定）：端末内にのみ保存されます。外部サーバーには送信されません。</li>
+      <li><strong>広告識別子</strong>：Google AdMob による広告配信のために使用されます。iOS の「アプリトラッキングの透明性（ATT）」に基づき、ユーザーの同意を得た場合にのみパーソナライズ広告が表示されます。</li>
+      <li><strong>利用状況・クラッシュ情報</strong>：App Store Connect の解析機能（Apple Analytics）を通じて、アプリの安定性改善のために収集されます。これは iOS の設定でユーザーが管理できます。</li>
+    </ul>
+
+    <h2>収集しない情報</h2>
+    <p>本アプリは以下の情報を収集しません。</p>
+    <ul>
+      <li>氏名・メールアドレス・電話番号などの個人を特定できる情報</li>
+      <li>位置情報</li>
+    </ul>
+
+    <h2>広告について</h2>
+    <p>
+      本アプリは <strong>Google AdMob</strong>（Google LLC）を使用して広告を表示します。
+      AdMob はパーソナライズ広告の配信のために広告識別子（IDFA）を使用することがあります。
+    </p>
+    <p>
+      iOS 14.5 以降では、アプリ起動時に表示される「アプリトラッキングの透明性（ATT）」の確認ダイアログにてトラッキングへの同意・拒否を選択できます。
+      拒否した場合はパーソナライズされない広告が表示されます。
+    </p>
+    <p>AdMob のプライバシーポリシー：<a href="https://policies.google.com/privacy" target="_blank">https://policies.google.com/privacy</a></p>
+
+    <h2>アプリ解析について</h2>
+    <p>
+      本アプリはアプリの品質向上・バグ対応のために、Apple が提供する解析機能（App Store Connect Analytics・クラッシュレポート）を利用します。
+      これらの情報は Apple によって収集・管理されており、個人を特定することはできません。
+      収集の可否は「設定」→「プライバシーとセキュリティ」→「解析と改善」から変更できます。
+    </p>
+
+    <h2>第三者サービスの利用</h2>
+    <p>本アプリは以下のサービスを使用しています。</p>
+    <ul>
+      <li>
+        <strong>Firebase Realtime Database</strong>（Google LLC）— リアルタイムスコア共有<br>
+        <a href="https://firebase.google.com/support/privacy" target="_blank">https://firebase.google.com/support/privacy</a>
+      </li>
+      <li>
+        <strong>Google AdMob</strong>（Google LLC）— 広告配信<br>
+        <a href="https://policies.google.com/privacy" target="_blank">https://policies.google.com/privacy</a>
+      </li>
+    </ul>
+
+    <h2>データの保持期間</h2>
+    <p>
+      Firebase に保存されるゲームスコアデータは、ゲーム終了時に削除されます。
+      端末内の設定データはアプリのアンインストール時に削除されます。
+    </p>
+
+    <h2>お問い合わせ</h2>
+    <p>
+      本ポリシーに関するご質問は、X（旧 Twitter）のアカウントまでお問い合わせください。<br>
+      <a href="https://x.com/onigiri_app" target="_blank">https://x.com/onigiri_app</a>
+    </p>
+
+    <p class="updated">最終更新日：2026年5月31日</p>
+  </div>
+</body>
+</html>
