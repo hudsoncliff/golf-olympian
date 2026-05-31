@@ -68,7 +68,8 @@ struct ShareModalView: View {
 
     var body: some View {
         ZStack {
-            AppBackground().ignoresSafeArea()
+            Color(red: 0.04, green: 0.09, blue: 0.15)
+                .ignoresSafeArea()
 
             VStack(spacing: 20) {
                 Text("📱 参加者に共有する")
