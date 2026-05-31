@@ -6,12 +6,16 @@ struct ResultView: View {
     var onEdit: () -> Void
     var onNewGame: () -> Void
 
-    private func rankEmoji(_ rank: Int) -> String {
+    @ViewBuilder
+    private func rankBadge(_ rank: Int) -> some View {
         switch rank {
-        case 1: return "🥇"
-        case 2: return "🥈"
-        case 3: return "🥉"
-        default: return "\(rank)位"
+        case 1: Text("🥇").font(.title3)
+        case 2: Text("🥈").font(.title3)
+        case 3: Text("🥉").font(.title3)
+        default:
+            Image(systemName: "medal.fill")
+                .font(.title3)
+                .foregroundStyle(Medal.iron.color)
         }
     }
 
@@ -28,8 +32,7 @@ struct ResultView: View {
 
                     ForEach(session.rankedPlayers(), id: \.player.id) { item in
                         HStack(spacing: 8) {
-                            Text(rankEmoji(item.rank))
-                                .font(.title3)
+                            rankBadge(item.rank)
                                 .frame(width: 32)
                             Text(item.player.name)
                                 .font(.system(size: 15))
