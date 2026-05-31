@@ -87,11 +87,13 @@ class FirebaseSync {
     }
 
     private func encodeHole(_ hole: HoleResult) -> [String: Any] {
+        // diamonds・saoichi はオブジェクト形式 {"uuid": true} で送る
+        // 配列形式だと Firebase が {"0": "uuid"} に変換し、JS 側で正しく読めない
         var d: [String: Any] = [
             "holeNumber": hole.holeNumber,
             "medals":   Dictionary(uniqueKeysWithValues: hole.medals.map { ($0.key.uuidString, $0.value.key) }),
-            "diamonds": hole.diamonds.map { $0.uuidString },
-            "saoichi":  hole.saoichi.map { $0.uuidString }
+            "diamonds": Dictionary(uniqueKeysWithValues: hole.diamonds.map { ($0.uuidString, true) }),
+            "saoichi":  Dictionary(uniqueKeysWithValues: hole.saoichi.map { ($0.uuidString, true) })
         ]
         if let n = hole.neapin { d["neapin"] = n.uuidString }
         return d
@@ -133,10 +135,15 @@ class FirebaseSync {
                 }
             }
         }
-        if let arr = d["diamonds"] as? [String] {
+        // オブジェクト形式 {"uuid": true} を優先、旧配列形式も後方互換で対応
+        if let dict = d["diamonds"] as? [String: Any] {
+            hole.diamonds = Set(dict.keys.compactMap { UUID(uuidString: $0) })
+        } else if let arr = d["diamonds"] as? [String] {
             hole.diamonds = Set(arr.compactMap { UUID(uuidString: $0) })
         }
-        if let arr = d["saoichi"] as? [String] {
+        if let dict = d["saoichi"] as? [String: Any] {
+            hole.saoichi = Set(dict.keys.compactMap { UUID(uuidString: $0) })
+        } else if let arr = d["saoichi"] as? [String] {
             hole.saoichi = Set(arr.compactMap { UUID(uuidString: $0) })
         }
         if let s = d["neapin"] as? String {

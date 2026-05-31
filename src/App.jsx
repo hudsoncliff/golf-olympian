@@ -40,12 +40,15 @@ function normalizeHoleResult(h) {
 function calcHolePoints(playerId, hole) {
   if (!hole) return 0;
   const { medals = {}, diamonds = {}, saoichi = {}, neapin } = hole;
+  // Firebase がオブジェクト形式 {"uuid": true} または配列 ["uuid"] のどちらで返しても対応
+  const hasDiamond = Array.isArray(diamonds) ? diamonds.includes(playerId) : !!diamonds[playerId];
+  const hasSaoichi = Array.isArray(saoichi)  ? saoichi.includes(playerId)  : !!saoichi[playerId];
   let pts = 0;
-  if (diamonds[playerId]) {
+  if (hasDiamond) {
     pts += SPECIAL_CONFIG.diamond.points;
   } else if (medals[playerId]) {
     pts += MEDAL_CONFIG[medals[playerId]].points;
-    if (saoichi[playerId]) pts += SPECIAL_CONFIG.saoichi.bonus;
+    if (hasSaoichi) pts += SPECIAL_CONFIG.saoichi.bonus;
   }
   if (neapin === playerId) pts += SPECIAL_CONFIG.neapin.points;
   return pts;
@@ -414,7 +417,9 @@ function ObserverView({ data, roomId }) {
     );
   }
 
-  const { players, holeResults: raw, currentHole, status } = data;
+  const { players: rawPlayers, holeResults: raw, currentHole, status } = data;
+  // Firebase が配列をオブジェクト {"0": {...}} に変換する場合も対応
+  const players = Array.isArray(rawPlayers) ? rawPlayers : Object.values(rawPlayers || {});
   const holeResults = Array.isArray(raw)
     ? raw
     : Array.from({ length: TOTAL_HOLES }, (_, i) => raw[i] || {});
