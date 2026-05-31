@@ -55,11 +55,11 @@ const styles = {
   app: {
     minHeight: "100vh",
     background: [
-      "radial-gradient(ellipse 200% 10% at 50% 52%, rgba(255,245,200,0.28) 0%, transparent 100%)",
-      "radial-gradient(ellipse 110% 60% at 40% 0%, rgba(18,82,160,0.55) 0%, transparent 80%)",
-      "radial-gradient(ellipse 110% 50% at 60% 100%, rgba(14,88,26,0.65) 0%, transparent 70%)",
-      "repeating-linear-gradient(90deg, rgba(0,0,0,0.045) 0px, rgba(0,0,0,0.045) 32px, transparent 32px, transparent 64px)",
-      "linear-gradient(180deg, #020c1a 0%, #092d5e 22%, #0d4878 42%, #156630 57%, #0c3d18 74%, #05140a 100%)",
+      "radial-gradient(ellipse 200% 10% at 50% 52%, rgba(255,245,200,0.22) 0%, transparent 100%)",
+      "radial-gradient(ellipse 110% 60% at 40% 0%, rgba(90,180,230,0.30) 0%, transparent 80%)",
+      "radial-gradient(ellipse 110% 50% at 60% 100%, rgba(20,110,45,0.55) 0%, transparent 70%)",
+      "repeating-linear-gradient(90deg, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 32px, transparent 32px, transparent 64px)",
+      "linear-gradient(180deg, #59b3e0 0%, #2179b7 30%, #1a7d47 55%, #0d4a1f 80%, #072d12 100%)",
     ].join(", "),
     backgroundAttachment: "fixed",
     fontFamily: "'Georgia', serif",

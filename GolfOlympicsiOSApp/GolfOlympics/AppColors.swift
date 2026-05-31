@@ -15,10 +15,10 @@ struct AppBackground: View {
     var body: some View {
         LinearGradient(
             colors: [
-                Color(red: 0.01, green: 0.05, blue: 0.10),
-                Color(red: 0.04, green: 0.18, blue: 0.37),
-                Color(red: 0.08, green: 0.40, blue: 0.27),
-                Color(red: 0.03, green: 0.24, blue: 0.09),
+                Color(red: 0.35, green: 0.70, blue: 0.88),  // 晴天の青空
+                Color(red: 0.13, green: 0.48, blue: 0.72),  // 深みのある青空
+                Color(red: 0.10, green: 0.50, blue: 0.28),  // フェアウェイグリーン
+                Color(red: 0.04, green: 0.28, blue: 0.12),  // ディープグリーン
             ],
             startPoint: .top,
             endPoint: .bottom
