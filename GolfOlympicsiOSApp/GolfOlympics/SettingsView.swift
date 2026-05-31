@@ -47,7 +47,7 @@ struct SettingsView: View {
                             placeholder: "例：ペリカ、ドル、石",
                             text: $currencyUnit
                         )
-                        Text("レート計算画面の精算額に表示されます")
+                        Text("レート計算画面の精算額に表示されます（例：ペリカ、ドル、石）")
                             .font(.system(size: 10))
                             .foregroundStyle(Color.white.opacity(0.35))
                     }
@@ -136,6 +136,7 @@ struct PointStepperRow: View {
         HStack {
             Text(label)
                 .font(.system(size: 14))
+                .foregroundStyle(Color.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
             Stepper("\(value)pt", value: $value, in: 0...20)
                 .fixedSize()
