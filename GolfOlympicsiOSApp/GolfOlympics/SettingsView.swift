@@ -3,9 +3,10 @@ import SwiftUI
 struct SettingsView: View {
     var onBack: () -> Void
 
-    @State private var userName    = AppSettings.userName
-    @State private var defaultRate = AppSettings.defaultRate
-    @State private var config      = AppSettings.pointConfig
+    @State private var userName      = AppSettings.userName
+    @State private var defaultRate   = AppSettings.defaultRate
+    @State private var currencyUnit  = AppSettings.currencyUnit
+    @State private var config        = AppSettings.pointConfig
 
     var body: some View {
         ScrollView {
@@ -25,7 +26,7 @@ struct SettingsView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("デフォルトレート（円 / pt）")
+                        Text("デフォルトレート（\(currencyUnit) / pt）")
                             .font(.system(size: 12))
                             .foregroundStyle(Color.white.opacity(0.55))
                         AppTextField(
@@ -36,6 +37,19 @@ struct SettingsView: View {
                             ),
                             keyboard: .numberPad
                         )
+                    }
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("通貨単位")
+                            .font(.system(size: 12))
+                            .foregroundStyle(Color.white.opacity(0.55))
+                        AppTextField(
+                            placeholder: "例：ペリカ、ドル、石",
+                            text: $currencyUnit
+                        )
+                        Text("レート計算画面の精算額に表示されます")
+                            .font(.system(size: 10))
+                            .foregroundStyle(Color.white.opacity(0.35))
                     }
                 }
                 .cardStyle()
@@ -77,9 +91,10 @@ struct SettingsView: View {
 
                 // 保存ボタン
                 Button("保存して戻る") {
-                    AppSettings.userName    = userName
-                    AppSettings.defaultRate = defaultRate
-                    AppSettings.pointConfig = config
+                    AppSettings.userName     = userName
+                    AppSettings.defaultRate  = defaultRate
+                    AppSettings.currencyUnit = currencyUnit.isEmpty ? "円" : currencyUnit
+                    AppSettings.pointConfig  = config
                     onBack()
                 }
                 .buttonStyle(PrimaryButtonStyle())

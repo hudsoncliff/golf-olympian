@@ -39,6 +39,11 @@ enum AppSettings {
         set { defaults.set(newValue, forKey: "defaultRate") }
     }
 
+    static var currencyUnit: String {
+        get { defaults.string(forKey: "currencyUnit") ?? "円" }
+        set { defaults.set(newValue, forKey: "currencyUnit") }
+    }
+
     static var pointConfig: PointConfig {
         get {
             guard let data = defaults.data(forKey: "pointConfig"),

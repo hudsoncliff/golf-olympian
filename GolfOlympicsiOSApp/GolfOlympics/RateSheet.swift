@@ -10,6 +10,7 @@ struct RateView: View {
         return r > 0 ? "\(r)" : ""
     }()
     @State private var showQuitAlert = false
+    private let currencyUnit = AppSettings.currencyUnit
 
     private var rate: Int { Int(rateText.filter(\.isNumber)) ?? 0 }
 
@@ -55,7 +56,7 @@ struct RateView: View {
                         Text("精算pt").frame(width: 48, alignment: .trailing)
                         if rate > 0 {
                             Text("").frame(width: 16)
-                            Text("精算額").frame(width: 88, alignment: .trailing)
+                            Text("精算額(\(currencyUnit))").frame(width: 88, alignment: .trailing)
                         }
                     }
                     .font(.system(size: 10))
@@ -135,7 +136,8 @@ struct RateView: View {
     }
 
     private func paymentLabel(_ p: Int) -> String {
-        p > 0 ? "+\(p.formatted())円" : p < 0 ? "\(p.formatted())円" : "±0円"
+        let u = currencyUnit
+        return p > 0 ? "+\(p.formatted())\(u)" : p < 0 ? "\(p.formatted())\(u)" : "±0\(u)"
     }
 
     private func scoreColor(_ s: Int) -> Color {
