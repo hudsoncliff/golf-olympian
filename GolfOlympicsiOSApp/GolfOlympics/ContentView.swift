@@ -51,6 +51,9 @@ struct ContentView: View {
                     onHoleSaved: {
                         sync.push(session: session)
                     },
+                    onDraftChanged: { draft in
+                        sync.pushWithDraft(draft, session: session)
+                    },
                     onQuit: {
                         sync.stopHosting()
                         screen = .home

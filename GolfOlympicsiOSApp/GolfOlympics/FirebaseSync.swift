@@ -30,7 +30,15 @@ class FirebaseSync {
 
     func push(session: GameSession, finished: Bool = false) {
         guard let ref else { return }
-        ref.setValue(encode(session: session, finished: finished))
+        ref.setValue(encode(session: session, holeResults: session.holeResults, finished: finished))
+    }
+
+    // draft を含む現在の入力状態をリアルタイムで同期する
+    func pushWithDraft(_ draft: HoleResult, session: GameSession) {
+        guard let ref else { return }
+        var results = session.holeResults
+        results[session.currentHole - 1] = draft
+        ref.setValue(encode(session: session, holeResults: results, finished: false))
     }
 
     func stopHosting() {
@@ -69,10 +77,10 @@ class FirebaseSync {
 
     // MARK: - Encoding
 
-    private func encode(session: GameSession, finished: Bool) -> [String: Any] {
+    private func encode(session: GameSession, holeResults: [HoleResult], finished: Bool) -> [String: Any] {
         [
             "players":     session.players.map { ["id": $0.id.uuidString, "name": $0.name] },
-            "holeResults": session.holeResults.map { encodeHole($0) },
+            "holeResults": holeResults.map { encodeHole($0) },
             "currentHole": session.currentHole,
             "status":      finished ? "finished" : "playing"
         ]

@@ -1,6 +1,6 @@
 import Foundation
 
-struct HoleResult: Codable {
+struct HoleResult: Codable, Equatable {
     let holeNumber: Int
     var medals:   [UUID: Medal]
     var diamonds: Set<UUID>

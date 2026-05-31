@@ -12,6 +12,7 @@ struct HoleInputView: View {
     var roomId: String?
     var onFinish: () -> Void
     var onHoleSaved: (() -> Void)?
+    var onDraftChanged: ((HoleResult) -> Void)?
     var onQuit: (() -> Void)?
 
     @State private var draft: HoleResult
@@ -19,11 +20,12 @@ struct HoleInputView: View {
     @State private var showHolePopup = false
     @State private var popupHoleNum  = 0
 
-    init(session: GameSession, roomId: String? = nil, onFinish: @escaping () -> Void, onHoleSaved: (() -> Void)? = nil, onQuit: (() -> Void)? = nil) {
+    init(session: GameSession, roomId: String? = nil, onFinish: @escaping () -> Void, onHoleSaved: (() -> Void)? = nil, onDraftChanged: ((HoleResult) -> Void)? = nil, onQuit: (() -> Void)? = nil) {
         self.session = session
         self.roomId = roomId
         self.onFinish = onFinish
         self.onHoleSaved = onHoleSaved
+        self.onDraftChanged = onDraftChanged
         self.onQuit = onQuit
         let idx = max(0, min(session.currentHole - 1, 17))
         self._draft = State(initialValue: session.holeResults[idx])
@@ -157,6 +159,10 @@ struct HoleInputView: View {
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 40)
+        }
+        // draft 変更をリアルタイムで Firebase に反映
+        .onChange(of: draft) { _, newDraft in
+            onDraftChanged?(newDraft)
         }
         // B: ホール番号中央ポップアップ
         .overlay {
