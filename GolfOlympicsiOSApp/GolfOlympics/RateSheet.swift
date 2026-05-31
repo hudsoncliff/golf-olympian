@@ -16,28 +16,20 @@ struct RateView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                // ヘッダー
+                // ヘッダー（矢印のみ・白）
                 HStack {
-                    Button {
-                        onBack()
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 14, weight: .semibold))
-                            Text("計算画面に戻る")
-                                .font(.system(size: 14))
-                        }
-                        .foregroundStyle(Color.appGold)
+                    Button { onBack() } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundStyle(Color.white)
                     }
                     Spacer()
                     Text("💴 レート計算")
                         .font(.system(size: 15, weight: .bold))
                         .foregroundStyle(Color.white)
                     Spacer()
-                    // バランス用の透明スペーサー
-                    Color.clear.frame(width: 80, height: 1)
+                    Color.clear.frame(width: 28, height: 1)
                 }
-                .padding(.horizontal, 20)
                 .padding(.top, 16)
 
                 // レート入力
@@ -55,14 +47,15 @@ struct RateView: View {
 
                 // 獲得pt → 精算pt → 精算額
                 VStack(alignment: .leading, spacing: 8) {
+                    // 列ヘッダー
                     HStack(spacing: 0) {
-                        Text("").frame(maxWidth: .infinity, alignment: .leading)
-                        Text("獲得pt").frame(width: 44, alignment: .trailing)
-                        Text("").frame(width: 18)
-                        Text("精算pt").frame(width: 44, alignment: .trailing)
+                        Spacer()
+                        Text("獲得pt").frame(width: 48, alignment: .trailing)
+                        Text("").frame(width: 16)
+                        Text("精算pt").frame(width: 48, alignment: .trailing)
                         if rate > 0 {
-                            Text("").frame(width: 18)
-                            Text("精算額").frame(width: 60, alignment: .trailing)
+                            Text("").frame(width: 16)
+                            Text("精算額").frame(width: 88, alignment: .trailing)
                         }
                     }
                     .font(.system(size: 10))
@@ -82,33 +75,36 @@ struct RateView: View {
                                 .font(.system(size: 13))
                                 .foregroundStyle(Color.white)
                                 .lineLimit(1)
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .minimumScaleFactor(0.8)
+                            Spacer(minLength: 6)
 
                             Text("\(total)pt")
                                 .font(.system(size: 13, weight: .bold))
                                 .foregroundStyle(Color.appGold)
-                                .frame(width: 44, alignment: .trailing)
+                                .frame(width: 48, alignment: .trailing)
 
                             Text("→")
                                 .font(.system(size: 10))
                                 .foregroundStyle(Color.white.opacity(0.25))
-                                .frame(width: 18)
+                                .frame(width: 16)
 
                             Text(scoreLabel(final_))
                                 .font(.system(size: 13, weight: .bold))
                                 .foregroundStyle(scoreColor(final_))
-                                .frame(width: 44, alignment: .trailing)
+                                .frame(width: 48, alignment: .trailing)
 
                             if rate > 0 {
                                 Text("→")
                                     .font(.system(size: 10))
                                     .foregroundStyle(Color.white.opacity(0.25))
-                                    .frame(width: 18)
+                                    .frame(width: 16)
 
                                 Text(paymentLabel(payment))
                                     .font(.system(size: 13, weight: .bold))
                                     .foregroundStyle(scoreColor(final_))
-                                    .frame(width: 60, alignment: .trailing)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.7)
+                                    .frame(width: 88, alignment: .trailing)
                             }
                         }
                         .padding(.horizontal, 12)
@@ -122,8 +118,8 @@ struct RateView: View {
                 // ゲームを終了するボタン
                 Button("ゲームを終了する") { showQuitAlert = true }
                     .buttonStyle(DangerButtonStyle())
-                    .padding(.horizontal, 20)
             }
+            .padding(.horizontal, 20)
             .padding(.bottom, 40)
         }
         .alert("ゲームを終了しますか？", isPresented: $showQuitAlert) {
