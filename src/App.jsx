@@ -14,7 +14,7 @@ const MEDAL_CONFIG = {
   gold:   { label: "🥇 金", points: 4, color: "#F5A623", bg: "#F5A623", border: "#F5A623" },
   silver: { label: "🥈 銀", points: 3, color: "#9B9B9B", bg: "#9B9B9B", border: "#9B9B9B" },
   bronze: { label: "🥉 銅", points: 2, color: "#C47B2B", bg: "#C47B2B", border: "#C47B2B" },
-  iron:   { label: "🔩 鉄", points: 1, color: "#607D8B", bg: "#607D8B", border: "#607D8B" },
+  iron:   { label: "🪨 鉄", points: 1, color: "#607D8B", bg: "#607D8B", border: "#607D8B" },
 };
 
 const SPECIAL_CONFIG = {

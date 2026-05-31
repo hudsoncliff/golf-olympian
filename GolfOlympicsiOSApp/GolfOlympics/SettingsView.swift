@@ -62,7 +62,7 @@ struct SettingsView: View {
                     PointStepperRow(label: "🥇 金",  value: $config.gold)
                     PointStepperRow(label: "🥈 銀",  value: $config.silver)
                     PointStepperRow(label: "🥉 銅",  value: $config.bronze)
-                    PointStepperRow(label: "🔩 鉄",  value: $config.iron)
+                    PointStepperRow(label: "🪨 鉄",  value: $config.iron)
                 }
                 .cardStyle()
 

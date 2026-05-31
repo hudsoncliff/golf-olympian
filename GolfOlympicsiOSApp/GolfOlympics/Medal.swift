@@ -13,7 +13,7 @@ enum Medal: Int, CaseIterable, Codable, Identifiable {
         case .gold:   return "🥇 金"
         case .silver: return "🥈 銀"
         case .bronze: return "🥉 銅"
-        case .iron:   return "🔩 鉄"
+        case .iron:   return "🪨 鉄"
         }
     }
 
@@ -22,7 +22,7 @@ enum Medal: Int, CaseIterable, Codable, Identifiable {
         case .gold:   return "🥇"
         case .silver: return "🥈"
         case .bronze: return "🥉"
-        case .iron:   return "🔩"
+        case .iron:   return "🪨"
         }
     }
 
