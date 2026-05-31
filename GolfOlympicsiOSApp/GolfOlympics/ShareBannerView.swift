@@ -1,6 +1,36 @@
 import SwiftUI
+import CoreImage.CIFilterBuiltins
 
-// ホール画面右上の共有ボタン
+// MARK: - QR Code
+
+struct QRCodeView: View {
+    let url: URL
+
+    private var qrImage: UIImage {
+        let context = CIContext()
+        let filter  = CIFilter.qrCodeGenerator()
+        filter.message         = Data(url.absoluteString.utf8)
+        filter.correctionLevel = "M"
+        guard let output = filter.outputImage else { return UIImage() }
+        let scaled = output.transformed(by: CGAffineTransform(scaleX: 10, y: 10))
+        guard let cgImage = context.createCGImage(scaled, from: scaled.extent) else { return UIImage() }
+        return UIImage(cgImage: cgImage)
+    }
+
+    var body: some View {
+        Image(uiImage: qrImage)
+            .interpolation(.none)
+            .resizable()
+            .scaledToFit()
+            .frame(width: 140, height: 140)
+            .padding(10)
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+// MARK: - Share Button（ホール画面右上）
+
 struct ShareButton: View {
     let roomId: String
     @State private var showSheet = false
@@ -21,12 +51,13 @@ struct ShareButton: View {
         }
         .sheet(isPresented: $showSheet) {
             ShareModalView(roomId: roomId)
-                .presentationDetents([.medium])
+                .presentationDetents([.large])
         }
     }
 }
 
-// 共有モーダルの内容
+// MARK: - Share Modal
+
 struct ShareModalView: View {
     let roomId: String
     @Environment(\.dismiss) private var dismiss
@@ -39,11 +70,12 @@ struct ShareModalView: View {
         ZStack {
             AppBackground().ignoresSafeArea()
 
-            VStack(spacing: 24) {
+            VStack(spacing: 20) {
                 Text("📱 参加者に共有する")
                     .sectionTitleStyle()
 
-                VStack(spacing: 8) {
+                // ルームコード
+                VStack(spacing: 6) {
                     Text("ルームコード")
                         .font(.system(size: 12))
                         .foregroundStyle(Color.white.opacity(0.5))
@@ -53,6 +85,15 @@ struct ShareModalView: View {
                         .foregroundStyle(Color.appGold)
                 }
 
+                // QR コード
+                VStack(spacing: 8) {
+                    QRCodeView(url: shareURL)
+                    Text("カメラで読み取るとWebで観戦できます")
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.white.opacity(0.45))
+                }
+
+                // 共有ボタン
                 ShareLink(item: shareURL, subject: Text("ONIGIRI")) {
                     Label("このゲームを共有", systemImage: "square.and.arrow.up")
                         .font(.system(size: 15, weight: .bold))
