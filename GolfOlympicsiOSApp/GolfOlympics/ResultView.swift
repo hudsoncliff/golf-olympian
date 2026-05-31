@@ -13,7 +13,7 @@ struct ResultView: View {
         case 2: Text("🥈").font(.title3)
         case 3: Text("🥉").font(.title3)
         default:
-            Image(systemName: "medal.fill")
+            Image(systemName: "circle.fill")
                 .font(.title3)
                 .foregroundStyle(Medal.iron.color)
         }
