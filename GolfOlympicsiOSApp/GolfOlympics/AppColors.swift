@@ -62,7 +62,7 @@ struct ScreenHeader: View {
 struct AppHeader: View {
     var body: some View {
         VStack(spacing: 4) {
-            Text("⛳️ ONIGIRI")
+            Text("⛳️ Onigiri Golf")
                 .font(.system(size: 22, weight: .bold))
                 .tracking(4)
                 .foregroundStyle(Color.appGold)

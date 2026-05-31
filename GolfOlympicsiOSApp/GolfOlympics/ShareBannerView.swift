@@ -95,7 +95,7 @@ struct ShareModalView: View {
                 }
 
                 // 共有ボタン
-                ShareLink(item: shareURL, subject: Text("ONIGIRI")) {
+                ShareLink(item: shareURL, subject: Text("Onigiri Golf")) {
                     Label("このゲームを共有", systemImage: "square.and.arrow.up")
                         .font(.system(size: 15, weight: .bold))
                         .frame(maxWidth: .infinity)

@@ -351,7 +351,7 @@ function RoomBanner({ roomId }) {
 
   const handleShare = () => {
     if (canShare) {
-      navigator.share({ title: "Golf Olympics", url });
+      navigator.share({ title: "Onigiri Golf", url });
     } else {
       navigator.clipboard?.writeText(url).then(() => {
         setCopied(true);
@@ -1040,7 +1040,7 @@ export default function App() {
   return (
     <div style={styles.app}>
       <div style={styles.header}>
-        <h1 style={styles.title}>⛳ GOLF OLYMPICS</h1>
+        <h1 style={styles.title}>⛳ Onigiri Golf</h1>
         <p style={styles.subtitle}>Score Tracker</p>
       </div>
 
