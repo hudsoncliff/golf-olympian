@@ -82,7 +82,7 @@ struct SettingsView: View {
                     Text("ルール説明")
                         .sectionTitleStyle()
 
-                    RuleRow(icon: "🥇🥈🥉🔩", title: "メダル", desc: "グリーンオン後、ピンから遠い順に金〜鉄を割り当て。1パットで沈めたプレイヤーのみ点数を獲得。")
+                    RuleRow(icon: "🥇🥈🥉🪨", title: "メダル", desc: "グリーンオン後、ピンから遠い順に金〜鉄を割り当て。1パットで沈めたプレイヤーのみ点数を獲得。")
                     RuleRow(icon: "💎", title: "ダイヤモンド", desc: "グリーン外からチップインした場合にポイント獲得。メダルは獲得しない。")
                     RuleRow(icon: "🚩", title: "竿イチ権", desc: "ボールとカップの距離が旗竿より長い場合に獲得。1パット成功時にボーナスポイント加算。")
                     RuleRow(icon: "📍", title: "ニアピン", desc: "グリーンオン後、カップに最も近いプレイヤーが獲得。1ホールにつき1人のみ。")
