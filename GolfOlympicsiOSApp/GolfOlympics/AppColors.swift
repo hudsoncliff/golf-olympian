@@ -36,11 +36,13 @@ struct AppHeader: View {
                 .font(.system(size: 22, weight: .bold))
                 .tracking(4)
                 .foregroundStyle(Color.appGold)
-                .shadow(color: Color.appGold.opacity(0.4), radius: 12)
+                .shadow(color: Color.black.opacity(0.5), radius: 4, x: 0, y: 2)
+                .shadow(color: Color.appGold.opacity(0.3), radius: 10)
             Text("SCORE TRACKER")
                 .font(.system(size: 10))
                 .tracking(6)
-                .foregroundStyle(Color.white.opacity(0.3))
+                .foregroundStyle(Color.white.opacity(0.85))
+                .shadow(color: Color.black.opacity(0.5), radius: 3, x: 0, y: 1)
         }
         .padding(.vertical, 20)
     }
@@ -74,10 +76,13 @@ extension View {
     func cardStyle() -> some View {
         self
             .padding(20)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color(red: 0.02, green: 0.07, blue: 0.12).opacity(0.82))
+            )
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
-                    .stroke(Color.white.opacity(0.09), lineWidth: 1)
+                    .stroke(Color.white.opacity(0.14), lineWidth: 1)
             )
     }
 
