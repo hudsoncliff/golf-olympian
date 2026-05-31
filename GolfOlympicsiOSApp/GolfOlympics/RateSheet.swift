@@ -21,7 +21,7 @@ struct RateView: View {
 
                 // レート入力
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("1ポイントあたりのレート（円）")
+                    Text("1ポイントあたりのレート（\(currencyUnit)）")
                         .font(.system(size: 12))
                         .foregroundStyle(Color.white.opacity(0.6))
                     AppTextField(

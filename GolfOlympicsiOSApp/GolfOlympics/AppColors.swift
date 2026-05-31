@@ -86,7 +86,9 @@ struct AppTextField: View {
     var keyboard: UIKeyboardType = .default
 
     var body: some View {
-        TextField(placeholder, text: $text)
+        TextField("", text: $text, prompt:
+            Text(placeholder).foregroundColor(.white.opacity(0.55))
+        )
             .keyboardType(keyboard)
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
