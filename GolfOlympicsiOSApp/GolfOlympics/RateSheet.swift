@@ -1,115 +1,136 @@
 import SwiftUI
 
-struct RateSheet: View {
+struct RateView: View {
     var session: GameSession
-    @Environment(\.dismiss) private var dismiss
+    var onBack: () -> Void
+    var onNewGame: () -> Void
+
     @State private var rateText: String = {
         let r = AppSettings.defaultRate
         return r > 0 ? "\(r)" : ""
     }()
+    @State private var showQuitAlert = false
 
     private var rate: Int { Int(rateText.filter(\.isNumber)) ?? 0 }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                AppBackground()
-                ScrollView {
-                    VStack(spacing: 16) {
-                        // レート入力
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("1ポイントあたりのレート（円）")
-                                .font(.system(size: 12))
-                                .foregroundStyle(Color.white.opacity(0.6))
-                            AppTextField(
-                                placeholder: "例: 100",
-                                text: $rateText,
-                                keyboard: .numberPad
-                            )
+        ScrollView {
+            VStack(spacing: 16) {
+                // ヘッダー
+                HStack {
+                    Button {
+                        onBack()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 14, weight: .semibold))
+                            Text("計算画面に戻る")
+                                .font(.system(size: 14))
                         }
-                        .cardStyle()
-
-                        // 合計pt → 精算pt → 精算額（一行で流れを表示）
-                        VStack(alignment: .leading, spacing: 8) {
-                            // 列ヘッダー
-                            HStack(spacing: 0) {
-                                Text("").frame(maxWidth: .infinity, alignment: .leading)
-                                Text("獲得pt")
-                                    .frame(width: 44, alignment: .trailing)
-                                Text("").frame(width: 18)
-                                Text("精算pt")
-                                    .frame(width: 44, alignment: .trailing)
-                                if rate > 0 {
-                                    Text("").frame(width: 18)
-                                    Text("精算額")
-                                        .frame(width: 60, alignment: .trailing)
-                                }
-                            }
-                            .font(.system(size: 10))
-                            .foregroundStyle(Color.white.opacity(0.35))
-                            .padding(.horizontal, 12)
-
-                            ForEach(
-                                session.players.sorted { session.finalScore(for: $0.id) > session.finalScore(for: $1.id) },
-                                id: \.id
-                            ) { player in
-                                let total   = session.totalScore(for: player.id)
-                                let final_  = session.finalScore(for: player.id)
-                                let payment = final_ * rate
-
-                                HStack(spacing: 0) {
-                                    Text(player.name)
-                                        .font(.system(size: 13))
-                                        .lineLimit(1)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                                    Text("\(total)pt")
-                                        .font(.system(size: 13, weight: .bold))
-                                        .foregroundStyle(Color.appGold)
-                                        .frame(width: 44, alignment: .trailing)
-
-                                    Text("→")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(Color.white.opacity(0.25))
-                                        .frame(width: 18)
-
-                                    Text(scoreLabel(final_))
-                                        .font(.system(size: 13, weight: .bold))
-                                        .foregroundStyle(scoreColor(final_))
-                                        .frame(width: 44, alignment: .trailing)
-
-                                    if rate > 0 {
-                                        Text("→")
-                                            .font(.system(size: 10))
-                                            .foregroundStyle(Color.white.opacity(0.25))
-                                            .frame(width: 18)
-
-                                        Text(paymentLabel(payment))
-                                            .font(.system(size: 13, weight: .bold))
-                                            .foregroundStyle(scoreColor(final_))
-                                            .frame(width: 60, alignment: .trailing)
-                                    }
-                                }
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 10)
-                                .background(scoreBg(final_))
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                            }
-                        }
-                        .cardStyle()
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 40)
-                }
-            }
-            .navigationTitle("💴 レート計算")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("閉じる") { dismiss() }
                         .foregroundStyle(Color.appGold)
+                    }
+                    Spacer()
+                    Text("💴 レート計算")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(Color.white)
+                    Spacer()
+                    // バランス用の透明スペーサー
+                    Color.clear.frame(width: 80, height: 1)
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+
+                // レート入力
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("1ポイントあたりのレート（円）")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color.white.opacity(0.6))
+                    AppTextField(
+                        placeholder: "例: 100",
+                        text: $rateText,
+                        keyboard: .numberPad
+                    )
+                }
+                .cardStyle()
+
+                // 獲得pt → 精算pt → 精算額
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 0) {
+                        Text("").frame(maxWidth: .infinity, alignment: .leading)
+                        Text("獲得pt").frame(width: 44, alignment: .trailing)
+                        Text("").frame(width: 18)
+                        Text("精算pt").frame(width: 44, alignment: .trailing)
+                        if rate > 0 {
+                            Text("").frame(width: 18)
+                            Text("精算額").frame(width: 60, alignment: .trailing)
+                        }
+                    }
+                    .font(.system(size: 10))
+                    .foregroundStyle(Color.white.opacity(0.35))
+                    .padding(.horizontal, 12)
+
+                    ForEach(
+                        session.players.sorted { session.finalScore(for: $0.id) > session.finalScore(for: $1.id) },
+                        id: \.id
+                    ) { player in
+                        let total   = session.totalScore(for: player.id)
+                        let final_  = session.finalScore(for: player.id)
+                        let payment = final_ * rate
+
+                        HStack(spacing: 0) {
+                            Text(player.name)
+                                .font(.system(size: 13))
+                                .foregroundStyle(Color.white)
+                                .lineLimit(1)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+
+                            Text("\(total)pt")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundStyle(Color.appGold)
+                                .frame(width: 44, alignment: .trailing)
+
+                            Text("→")
+                                .font(.system(size: 10))
+                                .foregroundStyle(Color.white.opacity(0.25))
+                                .frame(width: 18)
+
+                            Text(scoreLabel(final_))
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundStyle(scoreColor(final_))
+                                .frame(width: 44, alignment: .trailing)
+
+                            if rate > 0 {
+                                Text("→")
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(Color.white.opacity(0.25))
+                                    .frame(width: 18)
+
+                                Text(paymentLabel(payment))
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundStyle(scoreColor(final_))
+                                    .frame(width: 60, alignment: .trailing)
+                            }
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 10)
+                        .background(scoreBg(final_))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                }
+                .cardStyle()
+
+                // ゲームを終了するボタン
+                Button("ゲームを終了する") { showQuitAlert = true }
+                    .buttonStyle(DangerButtonStyle())
+                    .padding(.horizontal, 20)
             }
+            .padding(.bottom, 40)
+        }
+        .alert("ゲームを終了しますか？", isPresented: $showQuitAlert) {
+            Button("終了する", role: .destructive) { onNewGame() }
+            Button("キャンセル", role: .cancel) {}
+        } message: {
+            Text("スコアデータは保存されません。")
         }
     }
 

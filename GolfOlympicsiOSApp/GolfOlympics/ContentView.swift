@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum AppScreen: Equatable {
-    case home, roundSetup, hole, result, observe, settings
+    case home, roundSetup, hole, result, rate, observe, settings
 }
 
 struct ContentView: View {
@@ -62,13 +62,29 @@ struct ContentView: View {
 
             // ── 結果 ───────────────────────────────────────────
             case .result:
-                ResultView(session: session) {
-                    session.currentHole = 18
-                    screen = .hole
-                } onNewGame: {
-                    sync.stopHosting()
-                    screen = .home
-                }
+                ResultView(
+                    session: session,
+                    onShowRate: { screen = .rate },
+                    onEdit: {
+                        session.currentHole = 18
+                        screen = .hole
+                    },
+                    onNewGame: {
+                        sync.stopHosting()
+                        screen = .home
+                    }
+                )
+
+            // ── レート計算 ──────────────────────────────────────
+            case .rate:
+                RateView(
+                    session: session,
+                    onBack: { screen = .result },
+                    onNewGame: {
+                        sync.stopHosting()
+                        screen = .home
+                    }
+                )
 
             // ── 観戦 ───────────────────────────────────────────
             case .observe:

@@ -2,10 +2,9 @@ import SwiftUI
 
 struct ResultView: View {
     var session: GameSession
+    var onShowRate: () -> Void
     var onEdit: () -> Void
     var onNewGame: () -> Void
-
-    @State private var showRateSheet = false
 
     private func rankEmoji(_ rank: Int) -> String {
         switch rank {
@@ -34,6 +33,7 @@ struct ResultView: View {
                                 .frame(width: 32)
                             Text(item.player.name)
                                 .font(.system(size: 15))
+                                .foregroundStyle(Color.white)
                             Spacer()
                             Text("\(item.score)pt")
                                 .font(.system(size: 20, weight: .bold))
@@ -69,7 +69,9 @@ struct ResultView: View {
                     ) { player in
                         let score = session.finalScore(for: player.id)
                         HStack {
-                            Text(player.name).font(.system(size: 14))
+                            Text(player.name)
+                                .font(.system(size: 14))
+                                .foregroundStyle(Color.white)
                             Spacer()
                             Text(score > 0 ? "+\(score)pt" : score < 0 ? "\(score)pt" : "±0pt")
                                 .font(.system(size: 16, weight: .bold))
@@ -85,40 +87,15 @@ struct ResultView: View {
 
                 // アクションボタン
                 VStack(spacing: 10) {
-                    Button("💴 レート計算・集計") { showRateSheet = true }
+                    Button("💴 レート計算・集計") { onShowRate() }
                         .buttonStyle(PrimaryButtonStyle())
                     Button("✏️ スコアを修正する") { onEdit() }
                         .buttonStyle(SecondaryButtonStyle())
-                    Button("🔄 新しいゲームを始める") { onNewGame() }
-                        .buttonStyle(DangerButtonStyle())
                 }
                 .cardStyle()
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 40)
         }
-        .sheet(isPresented: $showRateSheet) {
-            RateSheet(session: session)
-        }
-    }
-}
-
-#Preview {
-    let session = GameSession()
-    session.setup(players: [
-        Player(name: "Alice"),
-        Player(name: "Bob"),
-        Player(name: "Carol"),
-    ])
-    // ダミーデータ
-    session.holeResults[0].medals = [session.players[0].id: .gold, session.players[1].id: .silver]
-    session.holeResults[0].diamonds.insert(session.players[2].id)
-    session.holeResults[1].medals = [session.players[1].id: .gold]
-    session.holeResults[1].saoichi.insert(session.players[1].id)
-    session.holeResults[1].neapin = session.players[0].id
-
-    return ZStack {
-        AppBackground()
-        ResultView(session: session) {} onNewGame: {}
     }
 }
