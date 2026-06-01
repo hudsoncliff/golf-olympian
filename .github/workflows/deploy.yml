@@ -33,6 +33,10 @@ jobs:
           VITE_FIREBASE_STORAGE_BUCKET:     ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
           VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
           VITE_FIREBASE_APP_ID:             ${{ secrets.VITE_FIREBASE_APP_ID }}
+      - name: Copy lp/ and privacy/ into dist
+        run: |
+          cp -r lp dist/lp
+          if [ -d privacy ]; then cp -r privacy dist/privacy; fi
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
