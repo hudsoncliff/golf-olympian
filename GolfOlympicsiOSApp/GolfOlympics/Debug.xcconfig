@@ -1,0 +1,12 @@
+//
+//  Debug.xcconfig
+//  GolfOlympics
+//
+//  Created by KaiOno on 2026/06/02.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
+
+// 共通設定（テスト広告ID含む）を読み込む
+#include "../Config.xcconfig"

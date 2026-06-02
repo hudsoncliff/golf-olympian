@@ -1,0 +1,10 @@
+//
+//  Release.xcconfig
+//  GolfOlympics
+//
+
+// Configuration settings file format documentation can be found at:
+// https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
+
+// 共通設定を読み込む（本番IDはSecretsで上書きされる）
+#include "../Config.xcconfig"
