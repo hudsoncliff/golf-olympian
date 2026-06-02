@@ -2,11 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- AdMob アプリID。AdConfig.appID と必ず一致させること。
-	     TODO: 本番のアプリID（ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY）へ差し替え。
-	     現在は Google 公式テスト用アプリID。 -->
+	<!-- AdMob アプリID。Config.xcconfig / Secrets.xcconfig の ADMOB_APP_ID から注入。 -->
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<string>$(ADMOB_APP_ID)</string>
+	<!-- バナー広告ユニットID。ADMOB_BANNER_UNIT_ID から注入し、Release時に AdConfig が読み取る。 -->
+	<key>GADBannerAdUnitID</key>
+	<string>$(ADMOB_BANNER_UNIT_ID)</string>
 	<!-- ATT（App Tracking Transparency）許可ダイアログに表示する説明文。
 	     AdMob を使うアプリは App Store 審査で必須。 -->
 	<key>NSUserTrackingUsageDescription</key>

@@ -8,3 +8,6 @@ dist
 xcuserdata/
 *.xcuserstate
 *.xcworkspace/xcuserdata/
+
+# AdMob 本番ID（コミットしない。Secrets.example.xcconfig からコピーして作成）
+GolfOlympicsiOSApp/Secrets.xcconfig

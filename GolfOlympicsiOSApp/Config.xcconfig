@@ -1,0 +1,14 @@
+// Config.xcconfig — AdMob 広告IDのビルド設定（コミットする）
+//
+// ここに書いた値はデフォルト（Google公式テストID）。
+// 本番IDは Secrets.xcconfig（.gitignore 済み）で上書きする。
+// Secrets.xcconfig が無ければ、このテストIDが使われる（安全なフォールバック）。
+
+// AdMob アプリID  → Info.plist の GADApplicationIdentifier に注入
+ADMOB_APP_ID = ca-app-pub-3940256099942544~1458002511
+
+// バナー広告ユニットID → Info.plist の GADBannerAdUnitID に注入（Release時に AdConfig が読み取る）
+ADMOB_BANNER_UNIT_ID = ca-app-pub-3940256099942544/2934735716
+
+// 本番IDがあれば Secrets.xcconfig で上書き（ファイルが無くてもエラーにならない）
+#include? "Secrets.xcconfig"
