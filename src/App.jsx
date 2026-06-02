@@ -1041,7 +1041,7 @@ export default function App() {
     <div style={styles.app}>
       <div style={styles.header}>
         <h1 style={styles.title}>⛳ Onigiri Golf</h1>
-        <p style={styles.subtitle}>Score Tracker</p>
+        <p style={styles.subtitle}>Olympic Scoring</p>
       </div>
 
       {screen === "observe" && (
