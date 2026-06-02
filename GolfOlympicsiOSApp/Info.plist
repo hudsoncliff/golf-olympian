@@ -7,6 +7,10 @@
 	     現在は Google 公式テスト用アプリID。 -->
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<!-- ATT（App Tracking Transparency）許可ダイアログに表示する説明文。
+	     AdMob を使うアプリは App Store 審査で必須。 -->
+	<key>NSUserTrackingUsageDescription</key>
+	<string>広告のパーソナライズのために、あなたのデータが使用されます。</string>
 	<!-- 広告計測用の SKAdNetwork ID。下記は Google AdMob のID。
 	     広告収益の計測精度を上げるには、Google提供の全ネットワークIDを追加することを推奨:
 	     https://developers.google.com/admob/ios/3p-skadnetworks -->
