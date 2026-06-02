@@ -205,3 +205,13 @@ npm run dev
 | 🚩 竿イチ権オプション | ✅ 完了 |
 | 📍 ニアピン（ショートホール） | ✅ 完了 |
 | データ保存・履歴 | 🔲 未実装（将来対応） |
+
+---
+
+## 公開URL
+
+| ページ | URL |
+|--------|-----|
+| LP | https://hudsoncliff.github.io/golf-olympian/lp/ |
+| プライバシーポリシー | https://hudsoncliff.github.io/golf-olympian/privacy/ |
+| X（お問い合わせ） | https://x.com/OnigiriGolf |

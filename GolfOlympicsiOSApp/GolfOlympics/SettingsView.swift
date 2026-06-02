@@ -22,7 +22,7 @@ struct SettingsView: View {
     @State private var config        = AppSettings.pointConfig
     @State private var showPrivacy   = false
 
-    private let privacyURL = URL(string: "https://hudsoncliff.github.io/golf-olympian/privacy-policy.html")!
+    private let privacyURL = URL(string: "https://hudsoncliff.github.io/golf-olympian/privacy/")!
 
     var body: some View {
         ScrollView {
