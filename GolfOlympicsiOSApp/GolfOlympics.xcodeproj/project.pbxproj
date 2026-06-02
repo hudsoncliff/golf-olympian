@@ -261,7 +261,8 @@
 		};
 		2A0674F92FCABAEE00D4FB39 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2ACF00012FCACC4E0047D9A1 /* Config.xcconfig */;
+			baseConfigurationReferenceAnchor = 2A0674EF2FCABAED00D4FB39 /* GolfOlympics */;
+			baseConfigurationReferenceRelativePath = Debug.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -296,7 +297,8 @@
 		};
 		2A0674FA2FCABAEE00D4FB39 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2ACF00012FCACC4E0047D9A1 /* Config.xcconfig */;
+			baseConfigurationReferenceAnchor = 2A0674EF2FCABAED00D4FB39 /* GolfOlympics */;
+			baseConfigurationReferenceRelativePath = Release.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
