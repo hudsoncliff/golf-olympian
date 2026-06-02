@@ -85,6 +85,45 @@
     </div>
   </section>
 
+  <!-- ===== Screenshots ===== -->
+  <section id="screens">
+    <div class="container">
+      <p class="section-label">Screens</p>
+      <h2 class="section-title">アプリ画面を<br>のぞいてみる</h2>
+      <p class="section-body">メダル選択から精算まで、実際の画面をチェック。横にスワイプできます。</p>
+
+      <div class="screenshots__scroll">
+        <figure class="screenshot">
+          <img src="assets/shots/01.png" alt="ホーム画面" loading="lazy" onerror="this.closest('.screenshot').remove()" />
+          <figcaption class="screenshot__caption">ゲーム開始も観戦もワンタップ</figcaption>
+        </figure>
+        <figure class="screenshot">
+          <img src="assets/shots/02.png" alt="ホール入力画面" loading="lazy" onerror="this.closest('.screenshot').remove()" />
+          <figcaption class="screenshot__caption">ホールごとにメダルをタップで選択</figcaption>
+        </figure>
+        <figure class="screenshot">
+          <img src="assets/shots/03.png" alt="結果画面" loading="lazy" onerror="this.closest('.screenshot').remove()" />
+          <figcaption class="screenshot__caption">順位と合計ポイントを自動集計</figcaption>
+        </figure>
+        <figure class="screenshot">
+          <img src="assets/shots/04.png" alt="レート精算画面" loading="lazy" onerror="this.closest('.screenshot').remove()" />
+          <figcaption class="screenshot__caption">レート入力で精算額を自動計算</figcaption>
+        </figure>
+        <figure class="screenshot">
+          <img src="assets/shots/05.png" alt="リアルタイム共有画面" loading="lazy" onerror="this.closest('.screenshot').remove()" />
+          <figcaption class="screenshot__caption">QRコードで複数端末にリアルタイム同期</figcaption>
+        </figure>
+      </div>
+    </div>
+    <script>
+      // スクリーンショット画像が1枚も読み込めない場合はセクションごと隠す（画像追加前の空表示を防止）
+      window.addEventListener('load', function () {
+        var sec = document.getElementById('screens');
+        if (sec && sec.querySelectorAll('.screenshot').length === 0) sec.style.display = 'none';
+      });
+    </script>
+  </section>
+
   <!-- ===== Features ===== -->
   <section>
     <div class="container">
