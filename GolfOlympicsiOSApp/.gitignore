@@ -1,5 +1,6 @@
 # Firebase - 機密情報
 GoogleService-Info.plist
+GoogleService-Info-Debug.plist
 
 # macOS
 .DS_Store

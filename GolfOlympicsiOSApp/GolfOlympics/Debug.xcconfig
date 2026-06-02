@@ -10,3 +10,5 @@
 
 // 共通設定（テスト広告ID含む）を読み込む
 #include "../Config.xcconfig"
+
+PRODUCT_BUNDLE_IDENTIFIER = com.flatnorm.GolfOlympics.debug

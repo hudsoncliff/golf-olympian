@@ -9,7 +9,18 @@ struct GolfOlympicsApp: App {
     @State private var didInitializeAds = false
 
     init() {
-        FirebaseApp.configure()
+        // Debug/Releaseで異なるGoogleService-Info.plistを読み込む
+        #if DEBUG
+        let plistName = "GoogleService-Info-Debug"
+        #else
+        let plistName = "GoogleService-Info"
+        #endif
+        if let filePath = Bundle.main.path(forResource: plistName, ofType: "plist"),
+           let options = FirebaseOptions(contentsOfFile: filePath) {
+            FirebaseApp.configure(options: options)
+        } else {
+            FirebaseApp.configure()
+        }
     }
 
     var body: some Scene {
