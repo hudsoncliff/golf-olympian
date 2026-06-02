@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- AdMob アプリID。AdConfig.appID と必ず一致させること。
+	     TODO: 本番のアプリID（ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY）へ差し替え。
+	     現在は Google 公式テスト用アプリID。 -->
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<!-- 広告計測用の SKAdNetwork ID。下記は Google AdMob のID。
+	     広告収益の計測精度を上げるには、Google提供の全ネットワークIDを追加することを推奨:
+	     https://developers.google.com/admob/ios/3p-skadnetworks -->
+	<key>SKAdNetworkItems</key>
+	<array>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>cstr6suwn9.skadnetwork</string>
+		</dict>
+	</array>
+</dict>
+</plist>
