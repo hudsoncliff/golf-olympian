@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2A3CE2B12FCACC4E0047D9A1 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 2A3CE2B02FCACC4E0047D9A1 /* FirebaseDatabase */; };
+		2AAD00032FCACC4E0047D9A1 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 2AAD00022FCACC4E0047D9A1 /* GoogleMobileAds */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2A3CE2B12FCACC4E0047D9A1 /* FirebaseDatabase in Frameworks */,
+				2AAD00032FCACC4E0047D9A1 /* GoogleMobileAds in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -71,6 +73,7 @@
 			name = GolfOlympics;
 			packageProductDependencies = (
 				2A3CE2B02FCACC4E0047D9A1 /* FirebaseDatabase */,
+				2AAD00022FCACC4E0047D9A1 /* GoogleMobileAds */,
 			);
 			productName = GolfOlympics;
 			productReference = 2A0674ED2FCABAED00D4FB39 /* GolfOlympics.app */;
@@ -102,6 +105,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				2A3CE2AF2FCACC4E0047D9A1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				2AAD00012FCACC4E0047D9A1 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2A0674EE2FCABAED00D4FB39 /* Products */;
@@ -264,6 +268,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Onigiri Golf";
+				INFOPLIST_KEY_GADApplicationIdentifier = "ca-app-pub-3940256099942544~1458002511";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "広告の関連性を高めるために、あなたのデータが使用されます。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -297,6 +303,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Onigiri Golf";
+				INFOPLIST_KEY_GADApplicationIdentifier = "ca-app-pub-3940256099942544~1458002511";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "広告の関連性を高めるために、あなたのデータが使用されます。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -351,6 +359,14 @@
 				minimumVersion = 12.14.0;
 			};
 		};
+		2AAD00012FCACC4E0047D9A1 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -358,6 +374,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2A3CE2AF2FCACC4E0047D9A1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseDatabase;
+		};
+		2AAD00022FCACC4E0047D9A1 /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2AAD00012FCACC4E0047D9A1 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

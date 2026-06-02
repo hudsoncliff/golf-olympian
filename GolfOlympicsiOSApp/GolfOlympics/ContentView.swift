@@ -103,5 +103,15 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: screen)
+        // 画面下部に常設するバナー広告（全画面共通）
+        .safeAreaInset(edge: .bottom) {
+            BannerAdView()
+                .frame(height: 50)
+                .frame(maxWidth: .infinity)
+                .background(.black.opacity(0.18))
+                .overlay(alignment: .top) {
+                    Divider().overlay(Color.white.opacity(0.15))
+                }
+        }
     }
 }
