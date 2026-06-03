@@ -19,7 +19,7 @@ struct PlayerHoleRow: View {
                 .font(.system(size: 14, weight: .bold))
                 .foregroundStyle(Color.white.opacity(0.9))
 
-            // メダルボタン行（ダイヤ選択中は代替テキスト表示）
+            // メダルボタン行（ダイヤモンド選択中は代替テキスト表示）
             HStack(spacing: 6) {
                 if isDiamond {
                     Text("💎 ダイヤモンド（メダル対象外）")
@@ -41,7 +41,7 @@ struct PlayerHoleRow: View {
 
             // 特殊オプション行（常時表示）
             HStack(spacing: 6) {
-                Button("💎 ダイヤ")    { onToggleDiamond() }
+                Button("💎 ダイヤモンド")    { onToggleDiamond() }
                     .buttonStyle(SpecialToggleStyle(isSelected: isDiamond, color: .appDiamond))
                 Button("🚩 竿イチ権") { onToggleSaoichi() }
                     .buttonStyle(SpecialToggleStyle(isSelected: isSaoichi, color: .appSaoichi))

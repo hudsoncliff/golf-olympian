@@ -18,7 +18,7 @@ const MEDAL_CONFIG = {
 };
 
 const SPECIAL_CONFIG = {
-  diamond: { label: "💎 ダイヤ", points: 5, color: "#64D4F7", bg: "rgba(100,212,247,0.15)", border: "#64D4F7" },
+  diamond: { label: "💎 ダイヤモンド", points: 5, color: "#64D4F7", bg: "rgba(100,212,247,0.15)", border: "#64D4F7" },
   saoichi: { label: "🚩 竿イチ権", bonus: 3, color: "#A78BFA", bg: "rgba(167,139,250,0.12)", border: "#A78BFA" },
   neapin:  { label: "📍 ニアピン", points: 2, color: "#34D399", bg: "rgba(52,211,153,0.12)", border: "#34D399" },
 };
@@ -554,7 +554,7 @@ function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFi
       } else {
         nextDiamonds[pid] = true;
         delete nextMedals[pid];
-        // ダイヤ追加で使用可能メダルが1つ減るため、範囲外になったメダルを除去
+        // ダイヤモンド追加で使用可能メダルが1つ減るため、範囲外になったメダルを除去
         const remaining = players.length - Object.keys(nextDiamonds).length;
         const validMedals = new Set(getMedalKeysForCount(remaining));
         Object.keys(nextMedals).forEach(id => {

@@ -87,7 +87,7 @@ struct SettingsView: View {
                     Text("オプション")
                         .sectionTitleStyle()
 
-                    PointStepperRow(label: "💎 ダイヤ",      value: $config.diamond)
+                    PointStepperRow(label: "💎 ダイヤモンド",      value: $config.diamond)
                     PointStepperRow(label: "🚩 竿イチボーナス", value: $config.saoichiBonus)
                     PointStepperRow(label: "📍 ニアピン",     value: $config.neapin)
                 }

@@ -29,7 +29,7 @@ struct HoleResult: Codable, Equatable {
         return pts
     }
 
-    // ダイヤ取得者を除いた残りプレイヤー数に応じて使用可能メダルを決定
+    // ダイヤモンド取得者を除いた残りプレイヤー数に応じて使用可能メダルを決定
     func availableMedals(playerCount: Int) -> [Medal] {
         Medal.keys(for: playerCount - diamonds.count)
     }
@@ -51,7 +51,7 @@ struct HoleResult: Codable, Equatable {
         } else {
             diamonds.insert(playerID)
             medals.removeValue(forKey: playerID)
-            // ダイヤ追加で使用可能メダルが1つ減るため、範囲外になったメダルを他プレイヤーからも除去
+            // ダイヤモンド追加で使用可能メダルが1つ減るため、範囲外になったメダルを他プレイヤーからも除去
             let valid = Set(availableMedals(playerCount: playerCount))
             medals = medals.filter { valid.contains($0.value) }
         }
