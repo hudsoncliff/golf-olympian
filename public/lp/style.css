@@ -1,6 +1,9 @@
 /* ===== Reset & Base ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* 画像は常にコンテナ幅に収める（はみ出し防止の保険） */
+img { max-width: 100%; height: auto; }
+
 :root {
   --color-bg: #ffffff;
   --color-text: #1a1a1a;
