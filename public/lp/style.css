@@ -1,6 +1,9 @@
 /* ===== Reset & Base ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* 画像は常にコンテナ幅に収める（はみ出し防止の保険） */
+img { max-width: 100%; height: auto; }
+
 :root {
   --color-bg: #ffffff;
   --color-text: #1a1a1a;
@@ -360,8 +363,10 @@ section + section {
 
 .screenshot img {
   width: 100%;
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+  border: 6px solid #1a1a1a;       /* スマホ風の黒フレーム */
+  border-radius: 30px;
+  background: #1a1a1a;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.18);
   display: block;
 }
 
@@ -382,6 +387,17 @@ section + section {
 
 .step {
   text-align: center;
+}
+
+.step__img {
+  width: 100%;
+  max-width: 150px;
+  border: 5px solid #1a1a1a;       /* スマホ風の黒フレーム */
+  border-radius: 26px;
+  background: #1a1a1a;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+  display: block;
+  margin: 0 auto 20px;
 }
 
 .step__num {
