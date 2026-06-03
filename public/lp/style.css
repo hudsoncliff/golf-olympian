@@ -41,42 +41,176 @@ section + section {
 
 /* ===== Hero ===== */
 .hero {
-  padding: 100px 0 80px;
-  text-align: center;
+  position: relative;
+  overflow: hidden;
+  min-height: 640px;
+  padding: 40px 0 34px;
+  color: #fff;
+  background: #103a25 url("assets/hero-golf-course.png") center / cover no-repeat;
+}
+
+.hero::before,
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hero::before {
+  background:
+    linear-gradient(90deg, rgba(7, 20, 15, 0.78) 0%, rgba(7, 20, 15, 0.58) 42%, rgba(7, 20, 15, 0.16) 100%),
+    linear-gradient(180deg, rgba(7, 20, 15, 0.28) 0%, rgba(7, 20, 15, 0.06) 48%, rgba(7, 20, 15, 0.62) 100%);
+}
+
+.hero::after {
+  background: radial-gradient(circle at 72% 24%, rgba(255, 205, 108, 0.28), transparent 36%);
+}
+
+.hero__container {
+  position: relative;
+  z-index: 1;
+  max-width: 1120px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(280px, 0.78fr);
+  gap: 56px;
+  align-items: center;
+}
+
+.hero__copy {
+  max-width: 620px;
+  text-shadow: 0 2px 18px rgba(0,0,0,0.28);
+}
+
+.hero__brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
 }
 
 .hero__icon {
-  width: 120px;
-  height: 120px;
-  border-radius: 26px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-  margin-bottom: 28px;
+  width: 64px;
+  height: 64px;
+  border-radius: 15px;
+  box-shadow: 0 10px 32px rgba(0,0,0,0.28);
 }
 
 .hero__name {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 4px;
   text-transform: uppercase;
-  color: var(--color-sub);
-  margin-bottom: 12px;
+  color: rgba(255,255,255,0.86);
+}
+
+.hero__role {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.72);
+  margin-top: 2px;
 }
 
 .hero__catch {
-  font-size: clamp(26px, 5vw, 40px);
+  font-size: clamp(34px, 5vw, 54px);
   font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.3;
-  margin-bottom: 16px;
+  line-height: 1.16;
+  margin-bottom: 20px;
+  max-width: 640px;
 }
 
 .hero__sub {
-  font-size: 16px;
-  color: var(--color-sub);
-  margin-bottom: 40px;
-  max-width: 480px;
-  margin-left: auto;
-  margin-right: auto;
+  font-size: 17px;
+  color: rgba(255,255,255,0.86);
+  margin-bottom: 24px;
+  max-width: 560px;
+}
+
+.hero__points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 34px;
+}
+
+.hero__points span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 13px;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.9);
+  font-size: 13px;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+}
+
+.hero__visual {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.phone {
+  position: relative;
+  width: min(250px, 82vw);
+  aspect-ratio: 1320 / 2868;
+  padding: 12px;
+  border-radius: 42px;
+  background: linear-gradient(145deg, #20242b, #050608);
+  box-shadow: 0 34px 90px rgba(0,0,0,0.48), 0 0 0 1px rgba(255,255,255,0.22) inset;
+}
+
+.phone__speaker {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  z-index: 2;
+  width: 82px;
+  height: 24px;
+  border-radius: 999px;
+  background: #020304;
+  transform: translateX(-50%);
+}
+
+.phone img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 32px;
+}
+
+.hero__mini-stat {
+  position: absolute;
+  right: -4px;
+  bottom: 30px;
+  width: 210px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 8px;
+  background: rgba(6, 28, 19, 0.78);
+  box-shadow: 0 18px 42px rgba(0,0,0,0.28);
+  backdrop-filter: blur(12px);
+}
+
+.hero__mini-stat span {
+  display: block;
+  color: #f4b12b;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.hero__mini-stat strong {
+  display: block;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.45;
+  margin-top: 4px;
 }
 
 .badge {
@@ -98,7 +232,7 @@ section + section {
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  opacity: 0.85;
+  box-shadow: 0 14px 32px rgba(0,0,0,0.26);
 }
 
 /* ===== Section heading ===== */
@@ -312,6 +446,91 @@ footer a:hover { color: var(--color-text); }
 /* ===== Responsive ===== */
 @media (max-width: 640px) {
   section { padding: 60px 0; }
+
+  .hero {
+    min-height: auto;
+    padding: 26px 0 38px;
+    background-position: 58% center;
+  }
+
+  .hero::before {
+    background:
+      linear-gradient(180deg, rgba(7, 20, 15, 0.88) 0%, rgba(7, 20, 15, 0.7) 42%, rgba(7, 20, 15, 0.5) 100%),
+      linear-gradient(90deg, rgba(7, 20, 15, 0.28), rgba(7, 20, 15, 0.08));
+  }
+
+  .hero__container {
+    grid-template-columns: 1fr;
+    gap: 26px;
+    padding: 0 20px;
+  }
+
+  .hero__brand {
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .hero__icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+  }
+
+  .hero__name {
+    font-size: 11px;
+    letter-spacing: 3px;
+  }
+
+  .hero__role {
+    font-size: 12px;
+  }
+
+  .hero__catch {
+    font-size: 30px;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+
+  .hero__sub {
+    font-size: 15px;
+    margin-bottom: 14px;
+  }
+
+  .hero__points {
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .hero__points span {
+    min-height: 30px;
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .hero__visual {
+    justify-content: flex-end;
+    padding-right: 12px;
+  }
+
+  .phone {
+    width: min(224px, 60vw);
+    padding: 8px;
+    border-radius: 30px;
+  }
+
+  .phone img {
+    border-radius: 23px;
+  }
+
+  .phone__speaker {
+    top: 13px;
+    width: 58px;
+    height: 17px;
+  }
+
+  .hero__mini-stat {
+    display: none;
+  }
 
   .what__content {
     grid-template-columns: 1fr;
