@@ -57,6 +57,7 @@ section + section {
 }
 
 .hero__inner {
+  max-width: 1020px;          /* ヒーローは本文(760px)より広げて余裕を持たせる */
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 48px;
