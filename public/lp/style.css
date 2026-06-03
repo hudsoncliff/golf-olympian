@@ -250,6 +250,15 @@ section + section {
   text-align: center;
 }
 
+.step__img {
+  width: 100%;
+  max-width: 150px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+  display: block;
+  margin: 0 auto 20px;
+}
+
 .step__num {
   width: 48px;
   height: 48px;
