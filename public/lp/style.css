@@ -229,8 +229,10 @@ section + section {
 
 .screenshot img {
   width: 100%;
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+  border: 6px solid #1a1a1a;       /* スマホ風の黒フレーム */
+  border-radius: 30px;
+  background: #1a1a1a;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.18);
   display: block;
 }
 
@@ -256,8 +258,10 @@ section + section {
 .step__img {
   width: 100%;
   max-width: 150px;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+  border: 5px solid #1a1a1a;       /* スマホ風の黒フレーム */
+  border-radius: 26px;
+  background: #1a1a1a;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.18);
   display: block;
   margin: 0 auto 20px;
 }
