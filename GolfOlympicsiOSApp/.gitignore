@@ -8,3 +8,6 @@ GoogleService-Info-Debug.plist
 # Xcode user-specific
 xcuserdata/
 *.xcuserstate
+
+*.xcarchive
+DerivedData/
