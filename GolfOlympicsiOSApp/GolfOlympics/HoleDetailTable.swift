@@ -87,6 +87,7 @@ struct HoleDetailTable: View {
         }
 
         if hole.neapin == playerID { icons += "📍" }
+        if hole.birdie.contains(playerID) { icons += "🐦" }
 
         return (icons, color)
     }

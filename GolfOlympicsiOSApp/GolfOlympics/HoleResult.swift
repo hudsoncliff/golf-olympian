@@ -6,6 +6,7 @@ struct HoleResult: Codable, Equatable {
     var diamonds: Set<UUID>
     var saoichi:  Set<UUID>
     var neapin:   UUID?
+    var birdie:   Set<UUID>
 
     init(holeNumber: Int) {
         self.holeNumber = holeNumber
@@ -13,6 +14,7 @@ struct HoleResult: Codable, Equatable {
         self.diamonds = []
         self.saoichi  = []
         self.neapin   = nil
+        self.birdie   = []
     }
 
     // MARK: - Score
@@ -26,6 +28,7 @@ struct HoleResult: Codable, Equatable {
             if saoichi.contains(playerID) { pts += config.saoichiBonus }
         }
         if neapin == playerID { pts += config.neapin }
+        if birdie.contains(playerID) { pts += config.birdie }
         return pts
     }
 
@@ -67,5 +70,10 @@ struct HoleResult: Codable, Equatable {
 
     mutating func selectNeapin(for playerID: UUID) {
         neapin = (neapin == playerID) ? nil : playerID  // ラジオ選択（1人のみ）
+    }
+
+    mutating func toggleBirdie(for playerID: UUID) {
+        if birdie.contains(playerID) { birdie.remove(playerID) }
+        else { birdie.insert(playerID) }
     }
 }

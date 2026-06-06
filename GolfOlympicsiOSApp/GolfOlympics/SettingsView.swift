@@ -90,6 +90,7 @@ struct SettingsView: View {
                     PointStepperRow(label: "💎 ダイヤモンド",      value: $config.diamond)
                     PointStepperRow(label: "🚩 竿イチボーナス", value: $config.saoichiBonus)
                     PointStepperRow(label: "📍 ニアピン",     value: $config.neapin)
+                    PointStepperRow(label: "🐦 バーディ",     value: $config.birdie)
                 }
                 .cardStyle()
 
@@ -102,6 +103,7 @@ struct SettingsView: View {
                     RuleRow(icon: "💎", title: "ダイヤモンド", desc: "グリーン外からチップインした場合にポイント獲得。メダルは獲得しない。")
                     RuleRow(icon: "🚩", title: "竿イチ権", desc: "ボールとカップの距離が旗竿より長い場合に獲得。1パット成功時にボーナスポイント加算。")
                     RuleRow(icon: "📍", title: "ニアピン", desc: "グリーンオン後、カップに最も近いプレイヤーが獲得。1ホールにつき1人のみ。")
+                    RuleRow(icon: "🐦", title: "バーディ", desc: "そのホールでバーディを達成したプレイヤーが獲得。メダルとの重複可。複数プレイヤーが同時取得可能。")
                 }
                 .cardStyle()
 

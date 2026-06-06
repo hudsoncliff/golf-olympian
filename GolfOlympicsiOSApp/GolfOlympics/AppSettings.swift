@@ -10,6 +10,7 @@ struct PointConfig: Codable {
     var diamond:      Int = 5
     var saoichiBonus: Int = 3
     var neapin:       Int = 2
+    var birdie:       Int = 3
 
     func medalPoints(_ medal: Medal) -> Int {
         switch medal {

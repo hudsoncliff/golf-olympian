@@ -6,11 +6,13 @@ struct PlayerHoleRow: View {
     let isDiamond: Bool
     let isSaoichi: Bool
     let isNeapin: Bool
+    let isBirdie: Bool
     let currentMedal: Medal?
 
     var onToggleDiamond: () -> Void
     var onToggleSaoichi: () -> Void
     var onToggleNeapin:  () -> Void
+    var onToggleBirdie:  () -> Void
     var onSelectMedal:   (Medal) -> Void
 
     var body: some View {
@@ -47,6 +49,8 @@ struct PlayerHoleRow: View {
                     .buttonStyle(SpecialToggleStyle(isSelected: isSaoichi, color: .appSaoichi))
                 Button("📍 ニアピン") { onToggleNeapin() }
                     .buttonStyle(SpecialToggleStyle(isSelected: isNeapin, color: .appNeapin))
+                Button("🐦 バーディ") { onToggleBirdie() }
+                    .buttonStyle(SpecialToggleStyle(isSelected: isBirdie, color: .appBirdie))
                 Spacer()
             }
         }

@@ -7,6 +7,7 @@ extension Color {
     static let appDiamond = Color(red: 0.39, green: 0.83, blue: 0.97)
     static let appSaoichi = Color(red: 0.65, green: 0.55, blue: 0.98)
     static let appNeapin  = Color(red: 0.20, green: 0.83, blue: 0.60)
+    static let appBirdie  = Color(red: 0.53, green: 0.94, blue: 0.67)
 }
 
 // MARK: - Background
