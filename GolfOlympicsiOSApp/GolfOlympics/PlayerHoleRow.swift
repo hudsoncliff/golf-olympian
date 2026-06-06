@@ -41,17 +41,21 @@ struct PlayerHoleRow: View {
             }
             .frame(minHeight: 28)
 
-            // 特殊オプション行（常時表示）
-            HStack(spacing: 6) {
-                Button("💎 ダイヤモンド")    { onToggleDiamond() }
+            // 特殊オプション 2×2グリッド
+            let columns = [GridItem(.flexible()), GridItem(.flexible())]
+            LazyVGrid(columns: columns, spacing: 6) {
+                Button("💎 ダイヤモンド") { onToggleDiamond() }
                     .buttonStyle(SpecialToggleStyle(isSelected: isDiamond, color: .appDiamond))
+                    .frame(maxWidth: .infinity)
                 Button("🚩 竿イチ権") { onToggleSaoichi() }
                     .buttonStyle(SpecialToggleStyle(isSelected: isSaoichi, color: .appSaoichi))
+                    .frame(maxWidth: .infinity)
                 Button("📍 ニアピン") { onToggleNeapin() }
                     .buttonStyle(SpecialToggleStyle(isSelected: isNeapin, color: .appNeapin))
+                    .frame(maxWidth: .infinity)
                 Button("🐦 バーディ") { onToggleBirdie() }
                     .buttonStyle(SpecialToggleStyle(isSelected: isBirdie, color: .appBirdie))
-                Spacer()
+                    .frame(maxWidth: .infinity)
             }
         }
         .padding(.vertical, 8)

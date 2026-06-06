@@ -210,6 +210,7 @@ struct SpecialToggleStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 13, weight: isSelected ? .bold : .regular))
+            .lineLimit(1)
             .padding(.horizontal, 13)
             .padding(.vertical, 9)
             .background(isSelected ? color : Color.white.opacity(0.05))
