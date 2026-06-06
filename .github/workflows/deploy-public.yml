@@ -1,0 +1,22 @@
+name: Deploy to Public Server
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy via rsync
+        uses: burnett01/rsync-deployments@7.0.1
+        with:
+          switches: -avzr --delete --exclude-from='deploy-exclude.txt'
+          path: public/
+          remote_path: ${{ secrets.SERVER_DIR_PUBLIC }}
+          remote_host: ${{ secrets.SERVER_DESTINATION_PUBLIC }}
+          remote_port: ${{ secrets.SERVER_PORT_PUBLIC }}
+          remote_user: ${{ secrets.USERNAME_PUBLIC }}
+          remote_key: ${{ secrets.SERVER_SSH_KEY }}

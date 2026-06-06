@@ -1,0 +1,9 @@
+# Web サーバーへのデプロイ除外リスト（rsync --exclude-from 用）
+# public/ ディレクトリ以下のパスで記述
+
+# OS 生成ファイル
+.DS_Store
+Thumbs.db
+
+# 開発用ファイル
+*.log
