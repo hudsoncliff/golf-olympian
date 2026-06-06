@@ -21,28 +21,30 @@ const SPECIAL_CONFIG = {
   diamond: { label: "💎 ダイヤモンド", points: 5, color: "#64D4F7", bg: "rgba(100,212,247,0.15)", border: "#64D4F7" },
   saoichi: { label: "🚩 竿イチ権", bonus: 3, color: "#A78BFA", bg: "rgba(167,139,250,0.12)", border: "#A78BFA" },
   neapin:  { label: "📍 ニアピン", points: 2, color: "#34D399", bg: "rgba(52,211,153,0.12)", border: "#34D399" },
+  birdie:  { label: "🐦 バーディ", points: 3, color: "#86EFAC", bg: "rgba(134,239,172,0.13)", border: "#86EFAC" },
 };
 
 const MEDAL_KEYS = ["gold", "silver", "bronze", "iron"];
 const TOTAL_HOLES = 18;
 
 function emptyHoleResult() {
-  return { medals: {}, diamonds: {}, saoichi: {}, neapin: null, isShort: false };
+  return { medals: {}, diamonds: {}, saoichi: {}, neapin: null, isShort: false, birdie: {} };
 }
 
 function normalizeHoleResult(h) {
   if (!h) return emptyHoleResult();
-  if (h.medals !== undefined) return h;
+  if (h.medals !== undefined) return { birdie: {}, ...h };
   // legacy flat format: { playerId: medalKey }
-  return { medals: { ...h }, diamonds: {}, saoichi: {}, neapin: null, isShort: false };
+  return { medals: { ...h }, diamonds: {}, saoichi: {}, neapin: null, isShort: false, birdie: {} };
 }
 
 function calcHolePoints(playerId, hole) {
   if (!hole) return 0;
-  const { medals = {}, diamonds = {}, saoichi = {}, neapin } = hole;
+  const { medals = {}, diamonds = {}, saoichi = {}, neapin, birdie = {} } = hole;
   // Firebase がオブジェクト形式 {"uuid": true} または配列 ["uuid"] のどちらで返しても対応
   const hasDiamond = Array.isArray(diamonds) ? diamonds.includes(playerId) : !!diamonds[playerId];
   const hasSaoichi = Array.isArray(saoichi)  ? saoichi.includes(playerId)  : !!saoichi[playerId];
+  const hasBirdie  = Array.isArray(birdie)   ? birdie.includes(playerId)   : !!birdie[playerId];
   let pts = 0;
   if (hasDiamond) {
     pts += SPECIAL_CONFIG.diamond.points;
@@ -51,6 +53,7 @@ function calcHolePoints(playerId, hole) {
     if (hasSaoichi) pts += SPECIAL_CONFIG.saoichi.bonus;
   }
   if (neapin === playerId) pts += SPECIAL_CONFIG.neapin.points;
+  if (hasBirdie) pts += SPECIAL_CONFIG.birdie.points;
   return pts;
 }
 
@@ -539,7 +542,7 @@ function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFi
   const [holeData, setHoleData] = useState(() => normalizeHoleResult(saved));
 
   const [confirmAbort, setConfirmAbort] = useState(false);
-  const { medals, diamonds, saoichi, neapin } = holeData;
+  const { medals, diamonds, saoichi, neapin, birdie = {} } = holeData;
 
   const nonDiamondPlayers = players.filter(p => !diamonds[p.id]);
   const availableMedals = getMedalKeysForCount(nonDiamondPlayers.length);
@@ -571,6 +574,15 @@ function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFi
       if (nextSaoichi[pid]) delete nextSaoichi[pid];
       else nextSaoichi[pid] = true;
       return { ...prev, saoichi: nextSaoichi };
+    });
+  };
+
+  const toggleBirdie = (pid) => {
+    setHoleData(prev => {
+      const nextBirdie = { ...(prev.birdie || {}) };
+      if (nextBirdie[pid]) delete nextBirdie[pid];
+      else nextBirdie[pid] = true;
+      return { ...prev, birdie: nextBirdie };
     });
   };
 
@@ -623,6 +635,7 @@ function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFi
         const isDiamond = !!diamonds[player.id];
         const isSaoichi = !!saoichi[player.id];
         const isNeapin = neapin === player.id;
+        const isBirdie = !!birdie[player.id];
         return (
           <div key={player.id} style={{ marginBottom: "14px", paddingBottom: "14px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
             <div style={{ fontSize: "13px", fontWeight: "bold", marginBottom: "7px" }}>{player.name}</div>
@@ -661,7 +674,7 @@ function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFi
                 })
               )}
             </div>
-            {/* Diamond + Saoichi + Neapin toggles */}
+            {/* Diamond + Saoichi + Neapin + Birdie toggles */}
             <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
               <button onClick={() => toggleDiamond(player.id)} style={specialBtn(isDiamond, SPECIAL_CONFIG.diamond)}>
                 {SPECIAL_CONFIG.diamond.label}
@@ -671,6 +684,9 @@ function HoleInputView({ players, holeResults, currentHole, onSave, onPrev, onFi
               </button>
               <button onClick={() => selectNeapin(player.id)} style={specialBtn(isNeapin, SPECIAL_CONFIG.neapin)}>
                 {SPECIAL_CONFIG.neapin.label}
+              </button>
+              <button onClick={() => toggleBirdie(player.id)} style={specialBtn(isBirdie, SPECIAL_CONFIG.birdie)}>
+                {SPECIAL_CONFIG.birdie.label}
               </button>
             </div>
           </div>
@@ -883,7 +899,7 @@ function ResultView({ players, holeResults, onEdit, onNewGame }) {
                       {i + 1}
                     </td>
                     {players.map(p => {
-                      const { medals: hm = {}, diamonds: hd = {}, saoichi: hs = {}, neapin: hn } = h;
+                      const { medals: hm = {}, diamonds: hd = {}, saoichi: hs = {}, neapin: hn, birdie: hb = {} } = h;
                       const pts = calcHolePoints(p.id, h);
                       let icons = "";
                       let color = "rgba(255,255,255,0.2)";
@@ -896,6 +912,7 @@ function ResultView({ players, holeResults, onEdit, onNewGame }) {
                         color = cfg.color;
                       }
                       if (hn === p.id) icons += "📍";
+                      if (hb[p.id]) icons += "🐦";
                       return (
                         <td key={p.id} style={{ textAlign: "center", padding: "3px 6px", color }}>
                           {pts === 0 ? "ー" : <>{pts}pt {icons}</>}
