@@ -1,0 +1,18 @@
+export const Colors = {
+  bg: '#0a1628',
+  bgCard: 'rgba(2,10,20,0.9)',
+  bgCardSolid: '#020A14',
+  bgRow: 'rgba(255,255,255,0.04)',
+  gold: '#F5A623',
+  white: '#f0e6d3',
+  whiteMuted: 'rgba(240,230,211,0.5)',
+  border: 'rgba(255,255,255,0.09)',
+  diamond: '#64D4F7',
+  saoichi: '#A78BFA',
+  neapin: '#34D399',
+  birdie: '#86EFAC',
+  danger: '#ff8a8a',
+  success: '#50C878',
+  progressBg: 'rgba(255,255,255,0.1)',
+  progressFill: '#F5A623',
+};
