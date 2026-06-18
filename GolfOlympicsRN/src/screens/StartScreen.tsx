@@ -7,8 +7,8 @@ import {
   ScrollView,
   StyleSheet,
   SafeAreaView,
-  Alert,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -52,46 +52,45 @@ export default function StartScreen({ navigation }: Props) {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerLeft} />
-          <Text style={styles.title}>⛳ Onigiri Golf</Text>
-          <TouchableOpacity style={styles.settingsBtn} onPress={handleSettingsPress} activeOpacity={0.7}>
-            <Text style={styles.settingsIcon}>⚙️</Text>
-          </TouchableOpacity>
-        </View>
-
-        <Text style={styles.subtitle}>オリンピック（マイホール）スコア管理</Text>
-
-        {/* Player Count */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>プレイヤー人数</Text>
-          <View style={styles.countRow}>
-            {[2, 3, 4].map((n) => (
-              <TouchableOpacity
-                key={n}
-                style={[styles.countBtn, playerCount === n && styles.countBtnActive]}
-                onPress={() => setPlayerCount(n)}
-                activeOpacity={0.7}
-              >
-                <Text style={[styles.countBtnText, playerCount === n && styles.countBtnTextActive]}>
-                  {n}人
-                </Text>
-              </TouchableOpacity>
-            ))}
+    <LinearGradient
+      colors={['#59B2E0', '#2079B7', '#1A8048', '#07471F']}
+      locations={[0, 0.3, 0.65, 1]}
+      style={styles.gradient}
+    >
+      <SafeAreaView style={styles.safe}>
+        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+          {/* App Header */}
+          <View style={styles.appHeader}>
+            <Text style={styles.title}>⛳️ Onigiri Golf</Text>
+            <Text style={styles.titleSub}>OLYMPIC SCORING</Text>
           </View>
-        </View>
 
-        {/* Player Names */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>プレイヤー名</Text>
-          {Array.from({ length: playerCount }, (_, i) => (
-            <View key={i} style={styles.nameRow}>
-              <Text style={styles.nameLabel}>P{i + 1}</Text>
+          {/* Player Count */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>プレイヤー人数</Text>
+            <View style={styles.countRow}>
+              {[2, 3, 4].map((n) => (
+                <TouchableOpacity
+                  key={n}
+                  style={[styles.countBtn, playerCount === n && styles.countBtnActive]}
+                  onPress={() => setPlayerCount(n)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.countBtnText, playerCount === n && styles.countBtnTextActive]}>
+                    {n}人
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Player Names */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>プレイヤー名</Text>
+            {Array.from({ length: playerCount }, (_, i) => (
               <TextInput
-                style={styles.nameInput}
+                key={i}
+                style={[styles.nameInput, i < playerCount - 1 && styles.nameInputSpaced]}
                 value={names[i]}
                 onChangeText={(text) => {
                   const next = [...names];
@@ -103,89 +102,73 @@ export default function StartScreen({ navigation }: Props) {
                 maxLength={12}
                 returnKeyType="done"
               />
-            </View>
-          ))}
-        </View>
-
-        {/* Start Button */}
-        <TouchableOpacity style={styles.startBtn} onPress={handleStart} activeOpacity={0.7}>
-          <Text style={styles.startBtnText}>ゲーム開始 ▶</Text>
-        </TouchableOpacity>
-
-        {/* Point Config Preview */}
-        <View style={styles.pointPreview}>
-          <Text style={styles.pointPreviewTitle}>現在のポイント設定</Text>
-          <View style={styles.pointPreviewRow}>
-            <Text style={styles.pointPreviewItem}>🥇{pointConfig.gold}pt</Text>
-            <Text style={styles.pointPreviewItem}>🥈{pointConfig.silver}pt</Text>
-            <Text style={styles.pointPreviewItem}>🥉{pointConfig.bronze}pt</Text>
-            <Text style={styles.pointPreviewItem}>🪨{pointConfig.iron}pt</Text>
+            ))}
           </View>
-          <View style={styles.pointPreviewRow}>
-            <Text style={styles.pointPreviewItem}>💎{pointConfig.diamond}pt</Text>
-            <Text style={styles.pointPreviewItem}>🚩+{pointConfig.saoichiBonus}pt</Text>
-            <Text style={styles.pointPreviewItem}>📍{pointConfig.neapin}pt</Text>
-            <Text style={styles.pointPreviewItem}>🐦{pointConfig.birdie}pt</Text>
-          </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+
+          {/* Start Button */}
+          <TouchableOpacity style={styles.startBtn} onPress={handleStart} activeOpacity={0.8}>
+            <Text style={styles.startBtnText}>ゲーム開始 🏌️</Text>
+          </TouchableOpacity>
+
+          {/* Settings Button */}
+          <TouchableOpacity style={styles.settingsBtn} onPress={handleSettingsPress} activeOpacity={0.7}>
+            <Text style={styles.settingsBtnText}>⚙️ 設定</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  gradient: {
+    flex: 1,
+  },
   safe: {
     flex: 1,
-    backgroundColor: Colors.bg,
   },
   container: {
     padding: 20,
     paddingBottom: 40,
   },
-  header: {
-    flexDirection: 'row',
+  appHeader: {
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  headerLeft: {
-    width: 40,
+    paddingVertical: 28,
   },
   title: {
     fontSize: 26,
     fontWeight: 'bold',
     color: Colors.gold,
     textAlign: 'center',
+    letterSpacing: 2,
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
-  settingsBtn: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  settingsIcon: {
-    fontSize: 24,
-  },
-  subtitle: {
-    fontSize: 13,
-    color: Colors.whiteMuted,
-    textAlign: 'center',
-    marginBottom: 28,
+  titleSub: {
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.85)',
+    letterSpacing: 6,
+    marginTop: 4,
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   card: {
-    backgroundColor: Colors.bgCardSolid,
-    borderRadius: 14,
-    padding: 16,
+    backgroundColor: 'rgba(2,10,20,0.82)',
+    borderRadius: 20,
+    padding: 20,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: 'rgba(255,255,255,0.14)',
   },
   cardTitle: {
-    fontSize: 13,
-    color: Colors.whiteMuted,
-    marginBottom: 12,
+    fontSize: 12,
+    color: Colors.gold,
+    marginBottom: 14,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 2,
+    fontWeight: '600',
   },
   countRow: {
     flexDirection: 'row',
@@ -197,7 +180,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: 'rgba(245,166,35,0.3)',
   },
   countBtnActive: {
     borderColor: Colors.gold,
@@ -211,61 +194,48 @@ const styles = StyleSheet.create({
   countBtnTextActive: {
     color: Colors.gold,
   },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  nameLabel: {
-    width: 28,
-    fontSize: 13,
-    color: Colors.whiteMuted,
-    fontWeight: '600',
-  },
   nameInput: {
-    flex: 1,
-    height: 40,
+    height: 44,
     backgroundColor: 'rgba(255,255,255,0.06)',
     borderRadius: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     color: Colors.white,
     fontSize: 15,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: 'rgba(245,166,35,0.3)',
+  },
+  nameInputSpaced: {
+    marginBottom: 10,
   },
   startBtn: {
     backgroundColor: Colors.gold,
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: 'center',
-    marginTop: 6,
-    marginBottom: 20,
+    marginTop: 4,
+    marginBottom: 12,
+    shadowColor: Colors.gold,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 6,
   },
   startBtnText: {
     fontSize: 17,
     fontWeight: 'bold',
     color: '#1a0a00',
   },
-  pointPreview: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    padding: 12,
+  settingsBtn: {
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderRadius: 14,
+    paddingVertical: 14,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
   },
-  pointPreviewTitle: {
-    fontSize: 11,
-    color: Colors.whiteMuted,
-    marginBottom: 8,
-    letterSpacing: 0.5,
-  },
-  pointPreviewRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 4,
-  },
-  pointPreviewItem: {
-    fontSize: 12,
-    color: Colors.whiteMuted,
+  settingsBtnText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: 'rgba(255,255,255,0.85)',
   },
 });

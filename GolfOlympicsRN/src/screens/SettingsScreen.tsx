@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -23,21 +24,60 @@ const STORAGE_KEY = '@golf_point_config';
 interface SettingRow {
   key: keyof PointConfig;
   label: string;
-  description: string;
   min: number;
   max: number;
 }
 
-const SETTING_ROWS: SettingRow[] = [
-  { key: 'gold',        label: '🥇 金メダル',   description: '金メダル獲得時の基本ポイント', min: 0, max: 20 },
-  { key: 'silver',      label: '🥈 銀メダル',   description: '銀メダル獲得時の基本ポイント', min: 0, max: 20 },
-  { key: 'bronze',      label: '🥉 銅メダル',   description: '銅メダル獲得時の基本ポイント', min: 0, max: 20 },
-  { key: 'iron',        label: '🪨 鉄メダル',   description: '鉄メダル獲得時の基本ポイント', min: 0, max: 20 },
-  { key: 'diamond',     label: '💎 ダイヤ',     description: 'ダイヤ選択時のポイント（メダルの代わり）', min: 0, max: 20 },
-  { key: 'saoichiBonus',label: '🚩 竿イチ権',   description: 'メダルへの加算ボーナス', min: 0, max: 20 },
-  { key: 'neapin',      label: '📍 ニアピン',   description: 'ショートホール限定ポイント', min: 0, max: 20 },
-  { key: 'birdie',      label: '🐦 バーディ',   description: 'バーディ獲得時のポイント', min: 0, max: 20 },
+const MEDAL_ROWS: SettingRow[] = [
+  { key: 'gold',        label: '🥇 金',   min: 0, max: 20 },
+  { key: 'silver',      label: '🥈 銀',   min: 0, max: 20 },
+  { key: 'bronze',      label: '🥉 銅',   min: 0, max: 20 },
+  { key: 'iron',        label: '🪨 鉄',   min: 0, max: 20 },
 ];
+
+const OPTION_ROWS: SettingRow[] = [
+  { key: 'diamond',      label: '💎 ダイヤモンド',  min: 0, max: 20 },
+  { key: 'saoichiBonus', label: '🚩 竿イチボーナス', min: 0, max: 20 },
+  { key: 'neapin',       label: '📍 ニアピン',       min: 0, max: 20 },
+  { key: 'birdie',       label: '🐦 バーディ',        min: 0, max: 20 },
+];
+
+function StepperRow({
+  row,
+  value,
+  onChange,
+  isLast,
+}: {
+  row: SettingRow;
+  value: number;
+  onChange: (delta: number) => void;
+  isLast: boolean;
+}) {
+  return (
+    <View style={[styles.row, !isLast && styles.rowBorder]}>
+      <Text style={styles.rowLabel}>{row.label}</Text>
+      <View style={styles.stepper}>
+        <TouchableOpacity
+          style={styles.stepBtn}
+          onPress={() => onChange(-1)}
+          activeOpacity={0.7}
+          disabled={value <= row.min}
+        >
+          <Text style={[styles.stepBtnText, value <= row.min && styles.stepBtnDisabled]}>−</Text>
+        </TouchableOpacity>
+        <Text style={styles.stepValue}>{value}pt</Text>
+        <TouchableOpacity
+          style={styles.stepBtn}
+          onPress={() => onChange(+1)}
+          activeOpacity={0.7}
+          disabled={value >= row.max}
+        >
+          <Text style={[styles.stepBtnText, value >= row.max && styles.stepBtnDisabled]}>＋</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
 
 export default function SettingsScreen({ navigation }: Props) {
   const [config, setConfig] = useState<PointConfig>({ ...DEFAULT_POINT_CONFIG });
@@ -56,8 +96,9 @@ export default function SettingsScreen({ navigation }: Props) {
   }, []);
 
   const handleChange = (key: keyof PointConfig, delta: number) => {
+    const allRows = [...MEDAL_ROWS, ...OPTION_ROWS];
     setConfig((prev) => {
-      const row = SETTING_ROWS.find((r) => r.key === key)!;
+      const row = allRows.find((r) => r.key === key)!;
       const next = Math.min(row.max, Math.max(row.min, prev[key] + delta));
       return { ...prev, [key]: next };
     });
@@ -89,79 +130,74 @@ export default function SettingsScreen({ navigation }: Props) {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()} activeOpacity={0.7}>
-          <Text style={styles.backBtnText}>← 戻る</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>⚙️ ポイント設定</Text>
-        <View style={styles.headerRight} />
-      </View>
-
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.note}>
-          各種ポイントをカスタマイズできます。設定はゲーム開始時に適用されます。
-        </Text>
-
-        <View style={styles.card}>
-          {SETTING_ROWS.map((row, idx) => (
-            <View
-              key={row.key}
-              style={[styles.row, idx < SETTING_ROWS.length - 1 && styles.rowBorder]}
-            >
-              <View style={styles.rowInfo}>
-                <Text style={styles.rowLabel}>{row.label}</Text>
-                <Text style={styles.rowDesc}>{row.description}</Text>
-              </View>
-              <View style={styles.stepper}>
-                <TouchableOpacity
-                  style={styles.stepBtn}
-                  onPress={() => handleChange(row.key, -1)}
-                  activeOpacity={0.7}
-                  disabled={config[row.key] <= row.min}
-                >
-                  <Text style={[styles.stepBtnText, config[row.key] <= row.min && styles.stepBtnDisabled]}>
-                    −
-                  </Text>
-                </TouchableOpacity>
-                <Text style={styles.stepValue}>{config[row.key]}</Text>
-                <TouchableOpacity
-                  style={styles.stepBtn}
-                  onPress={() => handleChange(row.key, +1)}
-                  activeOpacity={0.7}
-                  disabled={config[row.key] >= row.max}
-                >
-                  <Text style={[styles.stepBtnText, config[row.key] >= row.max && styles.stepBtnDisabled]}>
-                    ＋
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))}
+    <LinearGradient
+      colors={['#59B2E0', '#2079B7', '#1A8048', '#07471F']}
+      locations={[0, 0.3, 0.65, 1]}
+      style={styles.gradient}
+    >
+      <SafeAreaView style={styles.safe}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()} activeOpacity={0.7}>
+            <Text style={styles.backBtnText}>‹</Text>
+          </TouchableOpacity>
+          <Text style={styles.title}>設定</Text>
+          <View style={styles.headerRight} />
         </View>
 
-        {/* Action Buttons */}
-        <TouchableOpacity
-          style={[styles.saveBtn, saved && styles.saveBtnSaved]}
-          onPress={handleSave}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.saveBtnText}>{saved ? '✓ 保存しました' : '保存する'}</Text>
-        </TouchableOpacity>
+        <ScrollView contentContainerStyle={styles.container}>
+          {/* Medal Points */}
+          <Text style={styles.sectionTitle}>メダルポイント</Text>
+          <View style={styles.card}>
+            {MEDAL_ROWS.map((row, idx) => (
+              <StepperRow
+                key={row.key}
+                row={row}
+                value={config[row.key]}
+                onChange={(delta) => handleChange(row.key, delta)}
+                isLast={idx === MEDAL_ROWS.length - 1}
+              />
+            ))}
+          </View>
 
-        <TouchableOpacity style={styles.resetBtn} onPress={handleReset} activeOpacity={0.7}>
-          <Text style={styles.resetBtnText}>デフォルトに戻す</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
+          {/* Option Points */}
+          <Text style={styles.sectionTitle}>オプション</Text>
+          <View style={styles.card}>
+            {OPTION_ROWS.map((row, idx) => (
+              <StepperRow
+                key={row.key}
+                row={row}
+                value={config[row.key]}
+                onChange={(delta) => handleChange(row.key, delta)}
+                isLast={idx === OPTION_ROWS.length - 1}
+              />
+            ))}
+          </View>
+
+          {/* Action Buttons */}
+          <TouchableOpacity
+            style={[styles.saveBtn, saved && styles.saveBtnSaved]}
+            onPress={handleSave}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.saveBtnText}>{saved ? '✓ 保存しました' : '保存して戻る'}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.resetBtn} onPress={handleReset} activeOpacity={0.7}>
+            <Text style={styles.resetBtnText}>デフォルトに戻す</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  gradient: {
+    flex: 1,
+  },
   safe: {
     flex: 1,
-    backgroundColor: Colors.bg,
   },
   header: {
     flexDirection: 'row',
@@ -169,19 +205,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingTop: 10,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    paddingBottom: 12,
   },
   backBtn: {
-    paddingVertical: 6,
+    paddingVertical: 4,
     paddingHorizontal: 4,
-    minWidth: 60,
+    minWidth: 40,
   },
   backBtnText: {
-    fontSize: 15,
-    color: Colors.gold,
-    fontWeight: '600',
+    fontSize: 32,
+    color: Colors.white,
+    lineHeight: 34,
+    fontWeight: '300',
   },
   title: {
     fontSize: 17,
@@ -189,24 +224,30 @@ const styles = StyleSheet.create({
     color: Colors.white,
   },
   headerRight: {
-    minWidth: 60,
+    minWidth: 40,
   },
   container: {
     padding: 16,
     paddingBottom: 40,
-    gap: 14,
+    gap: 8,
   },
-  note: {
+  sectionTitle: {
     fontSize: 13,
-    color: Colors.whiteMuted,
-    lineHeight: 20,
+    color: Colors.gold,
+    fontWeight: '600',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginTop: 10,
+    marginBottom: 6,
+    marginLeft: 4,
   },
   card: {
-    backgroundColor: Colors.bgCardSolid,
+    backgroundColor: 'rgba(2,10,20,0.82)',
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: 'rgba(255,255,255,0.14)',
     overflow: 'hidden',
+    marginBottom: 4,
   },
   row: {
     flexDirection: 'row',
@@ -216,22 +257,13 @@ const styles = StyleSheet.create({
   },
   rowBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  rowInfo: {
-    flex: 1,
-    paddingRight: 12,
+    borderBottomColor: 'rgba(255,255,255,0.08)',
   },
   rowLabel: {
+    flex: 1,
     fontSize: 15,
-    color: Colors.white,
+    color: 'rgba(255,255,255,0.9)',
     fontWeight: '600',
-    marginBottom: 2,
-  },
-  rowDesc: {
-    fontSize: 11,
-    color: Colors.whiteMuted,
-    lineHeight: 16,
   },
   stepper: {
     flexDirection: 'row',
@@ -246,7 +278,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.07)',
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: 'rgba(245,166,35,0.4)',
   },
   stepBtnText: {
     fontSize: 20,
@@ -254,21 +286,26 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   stepBtnDisabled: {
-    color: Colors.whiteMuted,
-    opacity: 0.4,
+    color: 'rgba(255,255,255,0.2)',
   },
   stepValue: {
-    width: 36,
+    width: 52,
     textAlign: 'center',
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: 'bold',
     color: Colors.gold,
   },
   saveBtn: {
     backgroundColor: Colors.gold,
-    borderRadius: 12,
-    paddingVertical: 14,
+    borderRadius: 14,
+    paddingVertical: 16,
     alignItems: 'center',
+    marginTop: 10,
+    shadowColor: Colors.gold,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
   saveBtnSaved: {
     backgroundColor: Colors.success,
@@ -279,15 +316,16 @@ const styles = StyleSheet.create({
     color: '#1a0a00',
   },
   resetBtn: {
-    borderRadius: 12,
+    borderRadius: 14,
     paddingVertical: 14,
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.06)',
   },
   resetBtnText: {
     fontSize: 15,
-    color: Colors.whiteMuted,
+    color: 'rgba(255,255,255,0.7)',
     fontWeight: '600',
   },
 });

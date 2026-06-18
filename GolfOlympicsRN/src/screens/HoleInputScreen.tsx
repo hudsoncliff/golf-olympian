@@ -6,16 +6,15 @@ import {
   ScrollView,
   StyleSheet,
   SafeAreaView,
-  Alert,
   Modal,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { Colors } from '../theme/colors';
 import {
   MEDAL_CONFIG,
-  MEDAL_KEYS,
   MedalKey,
   getMedalKeysForCount,
   PointConfig,
@@ -37,7 +36,6 @@ type Props = {
 export default function HoleInputScreen({ navigation, route }: Props) {
   const { players, pointConfig } = route.params;
 
-  // Mutable game state stored in a ref to survive re-renders without triggering them
   const holeResultsRef = useRef<HoleResult[]>(
     Array.from({ length: TOTAL_HOLES }, (_, i) => emptyHoleResult(i + 1)),
   );
@@ -51,22 +49,18 @@ export default function HoleInputScreen({ navigation, route }: Props) {
   const hole = holeResultsRef.current[currentHole - 1];
   const availableMedals = getMedalKeysForCount(players.length);
 
-  // ---- Medal logic ----
   const toggleMedal = (playerId: string, medal: MedalKey) => {
     const h = holeResultsRef.current[currentHole - 1];
     const newMedals = { ...h.medals };
     const newDiamonds = { ...h.diamonds };
 
     if (newMedals[playerId] === medal) {
-      // Deselect
       delete newMedals[playerId];
     } else {
-      // Remove this medal from whoever had it
       for (const pid of Object.keys(newMedals)) {
         if (newMedals[pid] === medal) delete newMedals[pid];
       }
       newMedals[playerId] = medal;
-      // If this player had diamond, remove it (medal replaces diamond)
       delete newDiamonds[playerId];
     }
 
@@ -83,7 +77,6 @@ export default function HoleInputScreen({ navigation, route }: Props) {
       delete newDiamonds[playerId];
     } else {
       newDiamonds[playerId] = true;
-      // Remove medal for this player (diamond replaces it)
       delete newMedals[playerId];
     }
 
@@ -125,13 +118,11 @@ export default function HoleInputScreen({ navigation, route }: Props) {
   const toggleShort = () => {
     const h = holeResultsRef.current[currentHole - 1];
     const isShort = !h.isShort;
-    // Clear neapin if turning off short
     const neapin = isShort ? h.neapin : null;
     holeResultsRef.current[currentHole - 1] = { ...h, isShort, neapin };
     refresh();
   };
 
-  // ---- Navigation ----
   const handleBack = () => {
     if (currentHole === 1) {
       navigation.goBack();
@@ -165,212 +156,227 @@ export default function HoleInputScreen({ navigation, route }: Props) {
   const isLastHole = currentHole === TOTAL_HOLES;
 
   return (
-    <SafeAreaView style={styles.safe}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.holeInfoRow}>
-          <Text style={styles.holeLabel}>ホール</Text>
-          <Text style={styles.holeNum}>{currentHole}</Text>
-          <Text style={styles.holeTotal}>/ {TOTAL_HOLES}</Text>
-        </View>
-        <TouchableOpacity style={styles.quitBtn} onPress={handleQuit} activeOpacity={0.7}>
-          <Text style={styles.quitBtnText}>✕</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Progress Bar */}
-      <View style={styles.progressBg}>
-        <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
-      </View>
-
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        {/* Short Hole Toggle */}
-        <TouchableOpacity
-          style={[styles.shortToggle, hole.isShort && styles.shortToggleActive]}
-          onPress={toggleShort}
-          activeOpacity={0.7}
-        >
-          <Text style={[styles.shortToggleText, hole.isShort && styles.shortToggleTextActive]}>
-            ★ ショートホール {hole.isShort ? 'ON' : 'OFF'}
-          </Text>
-        </TouchableOpacity>
-
-        {/* Player Rows */}
-        {players.map((player) => {
-          const pts = calcHolePoints(player.id, hole, pointConfig);
-          const hasDiamond = !!hole.diamonds[player.id];
-          const hasSaoichi = !!hole.saoichi[player.id];
-          const hasNeapin = hole.neapin === player.id;
-          const hasBirdie = !!hole.birdie[player.id];
-          const playerMedal = hole.medals[player.id];
-
-          return (
-            <View key={player.id} style={styles.playerCard}>
-              {/* Player Name + Points */}
-              <View style={styles.playerHeader}>
-                <Text style={styles.playerName}>{player.name}</Text>
-                <View style={styles.ptsBadge}>
-                  <Text style={styles.ptsText}>{pts > 0 ? `+${pts}pt` : `${pts}pt`}</Text>
-                </View>
-              </View>
-
-              {/* Medal Buttons */}
-              <View style={styles.medalRow}>
-                {availableMedals.map((medal) => {
-                  const cfg = MEDAL_CONFIG[medal];
-                  const isActive = playerMedal === medal;
-                  const takenByOther =
-                    !isActive &&
-                    Object.values(hole.medals).includes(medal) &&
-                    hole.medals[player.id] !== medal;
-                  return (
-                    <TouchableOpacity
-                      key={medal}
-                      style={[
-                        styles.medalBtn,
-                        isActive && { backgroundColor: cfg.color + '33', borderColor: cfg.color },
-                        hasDiamond && styles.medalBtnDisabled,
-                        takenByOther && styles.medalBtnTaken,
-                      ]}
-                      onPress={() => !hasDiamond && toggleMedal(player.id, medal)}
-                      activeOpacity={0.7}
-                      disabled={hasDiamond}
-                    >
-                      <Text
-                        style={[
-                          styles.medalBtnText,
-                          isActive && { color: cfg.color },
-                          (hasDiamond || takenByOther) && styles.medalBtnTextMuted,
-                        ]}
-                      >
-                        {cfg.label}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-
-              {/* Special Row 1: Diamond, Saoichi, Neapin */}
-              <View style={styles.specialRow}>
-                <TouchableOpacity
-                  style={[styles.specialBtn, hasDiamond && styles.specialBtnActiveDiamond]}
-                  onPress={() => toggleDiamond(player.id)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.specialBtnText, hasDiamond && { color: Colors.diamond }]}>
-                    💎 ダイヤ
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[styles.specialBtn, hasSaoichi && styles.specialBtnActiveSaoichi]}
-                  onPress={() => toggleSaoichi(player.id)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.specialBtnText, hasSaoichi && { color: Colors.saoichi }]}>
-                    🚩 竿イチ権
-                  </Text>
-                </TouchableOpacity>
-
-                {hole.isShort && (
-                  <TouchableOpacity
-                    style={[styles.specialBtn, hasNeapin && styles.specialBtnActiveNeapin]}
-                    onPress={() => toggleNeapin(player.id)}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={[styles.specialBtnText, hasNeapin && { color: Colors.neapin }]}>
-                      📍 ニアピン
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-
-              {/* Special Row 2: Birdie */}
-              <View style={styles.specialRow}>
-                <TouchableOpacity
-                  style={[styles.specialBtn, hasBirdie && styles.specialBtnActiveBirdie]}
-                  onPress={() => toggleBirdie(player.id)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.specialBtnText, hasBirdie && { color: Colors.birdie }]}>
-                    🐦 バーディ
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          );
-        })}
-
-        {/* Mini Scoreboard */}
-        <View style={styles.scoreboard}>
-          <Text style={styles.scoreboardTitle}>累計スコア</Text>
-          {[...players]
-            .map((p) => ({
-              player: p,
-              total: calcTotalPoints(p.id, holeResultsRef.current.slice(0, currentHole), pointConfig),
-            }))
-            .sort((a, b) => b.total - a.total)
-            .map(({ player, total }, idx) => (
-              <View key={player.id} style={styles.scoreRow}>
-                <Text style={styles.scoreRank}>{idx + 1}位</Text>
-                <Text style={styles.scoreName}>{player.name}</Text>
-                <Text style={styles.scoreTotal}>{total}pt</Text>
-              </View>
-            ))}
-        </View>
-      </ScrollView>
-
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.backBtn} onPress={handleBack} activeOpacity={0.7}>
-          <Text style={styles.backBtnText}>← 戻る</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.nextBtn, isLastHole && styles.nextBtnFinish]}
-          onPress={handleNext}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.nextBtnText}>
-            {isLastHole ? '結果を見る 🏆' : '次のホールへ →'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Quit Confirmation Dialog */}
-      <Modal
-        visible={quitDialogVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setQuitDialogVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>ゲームを中止しますか？</Text>
-            <Text style={styles.modalBody}>入力したスコアは失われます。</Text>
-            <View style={styles.modalBtns}>
-              <TouchableOpacity
-                style={styles.modalCancelBtn}
-                onPress={() => setQuitDialogVisible(false)}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.modalCancelText}>キャンセル</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.modalQuitBtn} onPress={confirmQuit} activeOpacity={0.7}>
-                <Text style={styles.modalQuitText}>中止する</Text>
-              </TouchableOpacity>
+    <LinearGradient
+      colors={['#59B2E0', '#2079B7', '#1A8048', '#07471F']}
+      locations={[0, 0.2, 0.6, 1]}
+      style={styles.gradient}
+    >
+      <SafeAreaView style={styles.safe}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.holeInfo}>
+            <Text style={styles.holeLabel}>HOLE</Text>
+            <View style={styles.holeNumRow}>
+              <Text style={styles.holeNum}>{currentHole}</Text>
+              <Text style={styles.holeTotal}>{currentHole} / {TOTAL_HOLES}</Text>
             </View>
           </View>
+          <TouchableOpacity style={styles.quitBtn} onPress={handleQuit} activeOpacity={0.7}>
+            <Text style={styles.quitBtnText}>✕ ゲームを中止</Text>
+          </TouchableOpacity>
         </View>
-      </Modal>
-    </SafeAreaView>
+
+        {/* Progress Bar */}
+        <View style={styles.progressBg}>
+          <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+        </View>
+
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+          {/* Short Hole Toggle */}
+          <TouchableOpacity
+            style={[styles.shortToggle, hole.isShort && styles.shortToggleActive]}
+            onPress={toggleShort}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.shortToggleText, hole.isShort && styles.shortToggleTextActive]}>
+              ★ ショートホール {hole.isShort ? 'ON' : 'OFF'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Player Rows */}
+          {players.map((player) => {
+            const pts = calcHolePoints(player.id, hole, pointConfig);
+            const hasDiamond = !!hole.diamonds[player.id];
+            const hasSaoichi = !!hole.saoichi[player.id];
+            const hasNeapin = hole.neapin === player.id;
+            const hasBirdie = !!hole.birdie[player.id];
+            const playerMedal = hole.medals[player.id];
+
+            return (
+              <View key={player.id} style={styles.playerCard}>
+                {/* Player Name */}
+                <Text style={styles.playerName}>{player.name}</Text>
+
+                {/* Medal Buttons */}
+                <View style={styles.medalRow}>
+                  {hasDiamond ? (
+                    <Text style={styles.diamondPlaceholder}>💎 ダイヤモンド（メダル対象外）</Text>
+                  ) : (
+                    availableMedals.map((medal) => {
+                      const cfg = MEDAL_CONFIG[medal];
+                      const isActive = playerMedal === medal;
+                      const takenByOther =
+                        !isActive &&
+                        Object.values(hole.medals).includes(medal) &&
+                        hole.medals[player.id] !== medal;
+                      return (
+                        <TouchableOpacity
+                          key={medal}
+                          style={[
+                            styles.medalBtn,
+                            isActive && { backgroundColor: cfg.color + '33', borderColor: cfg.color },
+                            takenByOther && styles.medalBtnTaken,
+                          ]}
+                          onPress={() => toggleMedal(player.id, medal)}
+                          activeOpacity={0.7}
+                        >
+                          <Text
+                            style={[
+                              styles.medalBtnText,
+                              isActive && { color: cfg.color },
+                              takenByOther && styles.medalBtnTextMuted,
+                            ]}
+                          >
+                            {cfg.label}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })
+                  )}
+                  {!hasDiamond && <View style={{ flex: 1 }} />}
+                </View>
+
+                {/* Special Options Row 1: Diamond, Saoichi, Neapin */}
+                <View style={styles.specialRow}>
+                  <TouchableOpacity
+                    style={[styles.specialBtn, hasDiamond && styles.specialBtnActiveDiamond]}
+                    onPress={() => toggleDiamond(player.id)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[styles.specialBtnText, hasDiamond && { color: Colors.diamond }]}>
+                      💎 ダイヤモンド
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.specialBtn, hasSaoichi && styles.specialBtnActiveSaoichi]}
+                    onPress={() => toggleSaoichi(player.id)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[styles.specialBtnText, hasSaoichi && { color: Colors.saoichi }]}>
+                      🚩 竿イチ権
+                    </Text>
+                  </TouchableOpacity>
+
+                  {hole.isShort && (
+                    <TouchableOpacity
+                      style={[styles.specialBtn, hasNeapin && styles.specialBtnActiveNeapin]}
+                      onPress={() => toggleNeapin(player.id)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[styles.specialBtnText, hasNeapin && { color: Colors.neapin }]}>
+                        📍 ニアピン
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                {/* Special Options Row 2: Birdie */}
+                <View style={styles.specialRow}>
+                  <TouchableOpacity
+                    style={[styles.specialBtn, hasBirdie && styles.specialBtnActiveBirdie]}
+                    onPress={() => toggleBirdie(player.id)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[styles.specialBtnText, hasBirdie && { color: Colors.birdie }]}>
+                      🐦 バーディ
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Points indicator (only shown when > 0) */}
+                {pts > 0 && (
+                  <View style={styles.ptsIndicator}>
+                    <Text style={styles.ptsIndicatorText}>このホール +{pts}pt</Text>
+                  </View>
+                )}
+              </View>
+            );
+          })}
+
+          {/* Mini Scoreboard */}
+          <View style={styles.scoreboard}>
+            <Text style={styles.scoreboardTitle}>累計スコア</Text>
+            {[...players]
+              .map((p) => ({
+                player: p,
+                total: calcTotalPoints(p.id, holeResultsRef.current.slice(0, currentHole), pointConfig),
+              }))
+              .sort((a, b) => b.total - a.total)
+              .map(({ player, total }, idx) => (
+                <View key={player.id} style={styles.scoreRow}>
+                  <Text style={styles.scoreRank}>{idx + 1}位</Text>
+                  <Text style={styles.scoreName}>{player.name}</Text>
+                  <Text style={styles.scoreTotal}>{total}pt</Text>
+                </View>
+              ))}
+          </View>
+        </ScrollView>
+
+        {/* Bottom Navigation */}
+        <View style={styles.bottomNav}>
+          <TouchableOpacity style={styles.backBtn} onPress={handleBack} activeOpacity={0.7}>
+            <Text style={styles.backBtnText}>← 戻る</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.nextBtn, isLastHole && styles.nextBtnFinish]}
+            onPress={handleNext}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.nextBtnText}>
+              {isLastHole ? '結果を見る 🏆' : '次のホールへ →'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Quit Confirmation Dialog */}
+        <Modal
+          visible={quitDialogVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setQuitDialogVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalBox}>
+              <Text style={styles.modalTitle}>ゲームを中止しますか？</Text>
+              <Text style={styles.modalBody}>入力したスコアは失われます。</Text>
+              <View style={styles.modalBtns}>
+                <TouchableOpacity
+                  style={styles.modalCancelBtn}
+                  onPress={() => setQuitDialogVisible(false)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.modalCancelText}>キャンセル</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.modalQuitBtn} onPress={confirmQuit} activeOpacity={0.7}>
+                  <Text style={styles.modalQuitText}>中止する</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  gradient: {
+    flex: 1,
+  },
   safe: {
     flex: 1,
-    backgroundColor: Colors.bg,
   },
   header: {
     flexDirection: 'row',
@@ -378,45 +384,51 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingTop: 10,
-    paddingBottom: 6,
+    paddingBottom: 8,
   },
-  holeInfoRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 4,
+  holeInfo: {
+    gap: 2,
   },
   holeLabel: {
-    fontSize: 13,
-    color: Colors.whiteMuted,
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.7)',
+    letterSpacing: 2,
+    fontWeight: '600',
+  },
+  holeNumRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 10,
   },
   holeNum: {
-    fontSize: 32,
+    fontSize: 40,
     fontWeight: 'bold',
     color: Colors.gold,
-    lineHeight: 36,
+    lineHeight: 44,
   },
   holeTotal: {
-    fontSize: 16,
-    color: Colors.whiteMuted,
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.6)',
   },
   quitBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 10,
     backgroundColor: 'rgba(255,138,138,0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,138,138,0.3)',
   },
   quitBtnText: {
-    fontSize: 18,
+    fontSize: 13,
     color: Colors.danger,
+    fontWeight: '600',
   },
   progressBg: {
     height: 4,
-    backgroundColor: Colors.progressBg,
+    backgroundColor: 'rgba(255,255,255,0.15)',
     marginHorizontal: 16,
     borderRadius: 2,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   progressFill: {
     height: 4,
@@ -434,126 +446,126 @@ const styles = StyleSheet.create({
   shortToggle: {
     borderRadius: 10,
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: 'rgba(255,255,255,0.2)',
     paddingVertical: 10,
     alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.2)',
   },
   shortToggleActive: {
     borderColor: Colors.gold,
-    backgroundColor: 'rgba(245,166,35,0.1)',
+    backgroundColor: 'rgba(245,166,35,0.15)',
   },
   shortToggleText: {
     fontSize: 14,
-    color: Colors.whiteMuted,
+    color: 'rgba(255,255,255,0.6)',
     fontWeight: '600',
   },
   shortToggleTextActive: {
     color: Colors.gold,
   },
   playerCard: {
-    backgroundColor: Colors.bgCardSolid,
+    backgroundColor: 'rgba(2,10,20,0.82)',
     borderRadius: 14,
     padding: 12,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: 'rgba(255,255,255,0.14)',
     gap: 8,
   },
-  playerHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
   playerName: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: 'rgba(255,255,255,0.9)',
+    marginBottom: 2,
   },
-  ptsBadge: {
-    backgroundColor: 'rgba(245,166,35,0.15)',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-  },
-  ptsText: {
-    fontSize: 13,
-    color: Colors.gold,
-    fontWeight: '700',
+  diamondPlaceholder: {
+    fontSize: 12,
+    color: Colors.diamond,
+    fontStyle: 'italic',
+    flex: 1,
   },
   medalRow: {
     flexDirection: 'row',
     gap: 6,
-    flexWrap: 'wrap',
   },
   medalBtn: {
     flex: 1,
-    minWidth: 60,
-    paddingVertical: 8,
-    borderRadius: 8,
+    paddingVertical: 9,
+    borderRadius: 9,
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: 'rgba(255,255,255,0.12)',
     backgroundColor: 'rgba(255,255,255,0.04)',
-  },
-  medalBtnDisabled: {
-    opacity: 0.3,
   },
   medalBtnTaken: {
     opacity: 0.4,
   },
   medalBtnText: {
     fontSize: 12,
-    color: Colors.white,
+    color: 'rgba(255,255,255,0.5)',
     fontWeight: '600',
   },
   medalBtnTextMuted: {
-    color: Colors.whiteMuted,
+    color: 'rgba(255,255,255,0.3)',
   },
   specialRow: {
     flexDirection: 'row',
     gap: 6,
   },
   specialBtn: {
-    paddingVertical: 7,
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    paddingVertical: 9,
+    paddingHorizontal: 13,
+    borderRadius: 9,
     borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderColor: 'rgba(255,255,255,0.12)',
+    backgroundColor: 'rgba(255,255,255,0.04)',
   },
   specialBtnActiveDiamond: {
     borderColor: Colors.diamond,
-    backgroundColor: 'rgba(100,212,247,0.12)',
+    backgroundColor: 'rgba(100,212,247,0.15)',
   },
   specialBtnActiveSaoichi: {
     borderColor: Colors.saoichi,
-    backgroundColor: 'rgba(167,139,250,0.12)',
+    backgroundColor: 'rgba(167,139,250,0.15)',
   },
   specialBtnActiveNeapin: {
     borderColor: Colors.neapin,
-    backgroundColor: 'rgba(52,211,153,0.12)',
+    backgroundColor: 'rgba(52,211,153,0.15)',
   },
   specialBtnActiveBirdie: {
     borderColor: Colors.birdie,
-    backgroundColor: 'rgba(134,239,172,0.12)',
+    backgroundColor: 'rgba(134,239,172,0.15)',
   },
   specialBtnText: {
-    fontSize: 12,
-    color: Colors.whiteMuted,
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.4)',
     fontWeight: '600',
   },
+  ptsIndicator: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(245,166,35,0.15)',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  ptsIndicatorText: {
+    fontSize: 12,
+    color: Colors.gold,
+    fontWeight: '700',
+  },
   scoreboard: {
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: Colors.border,
-    padding: 12,
-    backgroundColor: Colors.bgCardSolid,
-    gap: 6,
+    borderColor: 'rgba(255,255,255,0.14)',
+    padding: 14,
+    backgroundColor: 'rgba(2,10,20,0.82)',
+    gap: 8,
   },
   scoreboardTitle: {
     fontSize: 11,
-    color: Colors.whiteMuted,
+    color: Colors.gold,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 2,
+    fontWeight: '600',
     marginBottom: 4,
   },
   scoreRow: {
@@ -563,13 +575,13 @@ const styles = StyleSheet.create({
   },
   scoreRank: {
     fontSize: 13,
-    color: Colors.whiteMuted,
+    color: 'rgba(255,255,255,0.5)',
     width: 28,
   },
   scoreName: {
     flex: 1,
     fontSize: 14,
-    color: Colors.white,
+    color: 'rgba(255,255,255,0.85)',
   },
   scoreTotal: {
     fontSize: 15,
@@ -581,7 +593,8 @@ const styles = StyleSheet.create({
     padding: 12,
     gap: 10,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
   backBtn: {
     flex: 1,
@@ -589,11 +602,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.06)',
   },
   backBtnText: {
     fontSize: 15,
-    color: Colors.whiteMuted,
+    color: 'rgba(255,255,255,0.7)',
     fontWeight: '600',
   },
   nextBtn: {
@@ -611,7 +625,6 @@ const styles = StyleSheet.create({
     color: '#1a0a00',
     fontWeight: 'bold',
   },
-  // Modal
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.7)',
@@ -624,7 +637,7 @@ const styles = StyleSheet.create({
     padding: 24,
     width: '80%',
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: 'rgba(255,255,255,0.14)',
   },
   modalTitle: {
     fontSize: 18,
@@ -649,7 +662,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: 'rgba(255,255,255,0.2)',
   },
   modalCancelText: {
     fontSize: 15,

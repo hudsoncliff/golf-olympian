@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   TextInput,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -20,37 +21,31 @@ type Props = {
   route: RouteProp<RootStackParamList, 'Result'>;
 };
 
-const RANK_EMOJI = ['🥇', '🥈', '🥉'];
+const RANK_MEDAL = ['🥇', '🥈', '🥉', '🔩'];
 
-function getRankEmoji(rank: number): string {
-  return rank < RANK_EMOJI.length ? RANK_EMOJI[rank] : `${rank + 1}位`;
+function getRankMedal(rank: number): string {
+  return RANK_MEDAL[rank] ?? `${rank + 1}`;
 }
 
-function holeLabel(hole: HoleResult): string {
-  const parts: string[] = [];
-  if (hole.isShort) parts.push('★');
-  return `H${hole.holeNumber}${parts.length ? ' ' + parts.join(' ') : ''}`;
-}
-
-function holePointSummary(hole: HoleResult, playerId: string, config: any): string {
+function holeIconSummary(hole: HoleResult, playerId: string, config: any): string {
   const pts = calcHolePoints(playerId, hole, config);
-  if (pts === 0) return '-';
-  const details: string[] = [];
-  if (hole.diamonds[playerId]) details.push('💎');
+  if (pts === 0) return '—';
+  const icons: string[] = [];
+  if (hole.diamonds[playerId]) icons.push('💎');
   else if (hole.medals[playerId]) {
     const mk = hole.medals[playerId] as MedalKey;
-    details.push(MEDAL_CONFIG[mk].label.split(' ')[0]);
-    if (hole.saoichi[playerId]) details.push('🚩');
+    icons.push(MEDAL_CONFIG[mk].label.split(' ')[0]);
+    if (hole.saoichi[playerId]) icons.push('🚩');
   }
-  if (hole.neapin === playerId) details.push('📍');
-  if (hole.birdie[playerId]) details.push('🐦');
-  return `+${pts}pt ${details.join('')}`;
+  if (hole.neapin === playerId) icons.push('📍');
+  if (hole.birdie[playerId]) icons.push('🐦');
+  return `+${pts}pt ${icons.join('')}`;
 }
 
 export default function ResultScreen({ navigation, route }: Props) {
   const { players, holeResults, pointConfig } = route.params;
   const [rateText, setRateText] = useState('');
-  const [expandedHoles, setExpandedHoles] = useState<Set<number>>(new Set());
+  const [holeDetailOpen, setHoleDetailOpen] = useState(false);
 
   const totals = players.map((p) => ({
     player: p,
@@ -58,9 +53,12 @@ export default function ResultScreen({ navigation, route }: Props) {
   }));
   const sorted = [...totals].sort((a, b) => b.total - a.total);
 
-  // Settlement: each player pays/receives based on score difference
-  // Settlement per player = score × (n-1) - sum of others' scores
-  // Simpler approach: difference from average, scaled by rate
+  // Assign ranks (handle ties)
+  const rankedSorted = sorted.map((item, idx) => {
+    const rank = sorted.findIndex((s) => s.total === item.total);
+    return { ...item, rank };
+  });
+
   const rate = parseFloat(rateText) || 0;
   const n = players.length;
   const totalSum = totals.reduce((s, t) => s + t.total, 0);
@@ -69,18 +67,9 @@ export default function ResultScreen({ navigation, route }: Props) {
   const settlements = totals.map(({ player, total }) => ({
     player,
     total,
-    net: total - avg, // positive = receive, negative = pay
+    net: total - avg,
     amount: Math.round((total - avg) * rate),
   }));
-
-  const toggleHoleExpand = (holeNum: number) => {
-    setExpandedHoles((prev) => {
-      const next = new Set(prev);
-      if (next.has(holeNum)) next.delete(holeNum);
-      else next.add(holeNum);
-      return next;
-    });
-  };
 
   const handleEditScores = () => {
     navigation.navigate('HoleInput', { players, pointConfig });
@@ -91,171 +80,234 @@ export default function ResultScreen({ navigation, route }: Props) {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.container}>
-        {/* Title */}
-        <Text style={styles.title}>🏆 最終結果</Text>
+    <LinearGradient
+      colors={['#59B2E0', '#2079B7', '#1A8048', '#07471F']}
+      locations={[0, 0.25, 0.6, 1]}
+      style={styles.gradient}
+    >
+      <SafeAreaView style={styles.safe}>
+        <ScrollView contentContainerStyle={styles.container}>
+          {/* App Header */}
+          <View style={styles.appHeader}>
+            <Text style={styles.appTitle}>⛳️ Onigiri Golf</Text>
+            <Text style={styles.appSub}>OLYMPIC SCORING</Text>
+          </View>
 
-        {/* Rankings */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>順位</Text>
-          {sorted.map(({ player, total }, idx) => (
-            <View key={player.id} style={[styles.rankRow, idx === 0 && styles.rankRowFirst]}>
-              <Text style={styles.rankEmoji}>{getRankEmoji(idx)}</Text>
-              <Text style={[styles.rankName, idx === 0 && styles.rankNameFirst]}>{player.name}</Text>
-              <Text style={[styles.rankTotal, idx === 0 && styles.rankTotalFirst]}>{total}pt</Text>
+          {/* Rankings */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>🏆 最終結果</Text>
+            {rankedSorted.map(({ player, total, rank }, idx) => (
+              <View key={player.id} style={[styles.rankRow, idx === 0 && styles.rankRowFirst]}>
+                <Text style={styles.rankEmoji}>{getRankMedal(rank)}</Text>
+                <Text style={[styles.rankName, idx === 0 && styles.rankNameFirst]}>
+                  {player.name}
+                </Text>
+                <Text style={[styles.rankTotal, idx === 0 && styles.rankTotalFirst]}>
+                  {total}pt
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Hole-by-hole Details */}
+          <View style={styles.card}>
+            <TouchableOpacity
+              style={styles.holeDetailToggle}
+              onPress={() => setHoleDetailOpen(!holeDetailOpen)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.cardTitle}>ホール別点数を見る</Text>
+              <Text style={styles.toggleChevron}>{holeDetailOpen ? '▲' : '▼'}</Text>
+            </TouchableOpacity>
+
+            {holeDetailOpen && (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tableScroll}>
+                <View>
+                  {/* Table Header */}
+                  <View style={styles.tableRow}>
+                    <Text style={[styles.tableCell, styles.tableCellH]}>H</Text>
+                    {players.map((p) => (
+                      <Text key={p.id} style={[styles.tableCell, styles.tableCellPlayer]}>
+                        {p.name}
+                      </Text>
+                    ))}
+                  </View>
+                  {/* Table Body */}
+                  {holeResults.map((hole) => {
+                    const hasData = players.some((p) => calcHolePoints(p.id, hole, pointConfig) > 0);
+                    return (
+                      <View
+                        key={hole.holeNumber}
+                        style={[styles.tableRow, hasData && styles.tableRowActive]}
+                      >
+                        <Text style={[styles.tableCell, styles.tableCellH, hasData && styles.tableCellHActive]}>
+                          {hole.holeNumber}
+                        </Text>
+                        {players.map((p) => {
+                          const pts = calcHolePoints(p.id, hole, pointConfig);
+                          return (
+                            <Text
+                              key={p.id}
+                              style={[
+                                styles.tableCell,
+                                styles.tableCellPlayer,
+                                pts > 0 && styles.tableCellPositive,
+                              ]}
+                            >
+                              {pts > 0 ? holeIconSummary(hole, p.id, pointConfig) : '—'}
+                            </Text>
+                          );
+                        })}
+                      </View>
+                    );
+                  })}
+                </View>
+              </ScrollView>
+            )}
+          </View>
+
+          {/* Settlement Points */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>精算点</Text>
+            <Text style={styles.settlementFormula}>
+              本人pt × (人数-1) − 他全員のpt合計
+            </Text>
+            {totals.map(({ player, total }) => {
+              const net = total * (n - 1) - (totalSum - total);
+              return (
+                <View key={player.id} style={styles.settlementRow}>
+                  <Text style={styles.settlementName}>{player.name}</Text>
+                  <Text
+                    style={[
+                      styles.settlementNet,
+                      net > 0 && styles.settlementPositive,
+                      net < 0 && styles.settlementNegative,
+                    ]}
+                  >
+                    {net >= 0 ? `+${net}pt` : `${net}pt`}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+
+          {/* Rate Calculation */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>💴 レート計算・集計</Text>
+            <View style={styles.rateInputRow}>
+              <Text style={styles.rateLabel}>1ポイントあたりのレート（円）</Text>
             </View>
-          ))}
-        </View>
-
-        {/* Settlement / Rate Calculation */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>💴 レート精算</Text>
-          <View style={styles.rateInputRow}>
-            <Text style={styles.rateLabel}>レート (1ptあたり):</Text>
             <TextInput
               style={styles.rateInput}
               value={rateText}
               onChangeText={setRateText}
               keyboardType="numeric"
-              placeholder="例: 100"
+              placeholder="100"
               placeholderTextColor={Colors.whiteMuted}
             />
-            <Text style={styles.rateCurrency}>円</Text>
+            {rate > 0 && (
+              <View style={styles.rateResultList}>
+                <View style={styles.rateResultHeader}>
+                  <Text style={[styles.rateResultCell, styles.rateResultName]}></Text>
+                  <Text style={styles.rateResultCell}>獲得pt</Text>
+                  <Text style={styles.rateResultCell}>精算pt</Text>
+                  <Text style={styles.rateResultCell}>精算額(円)</Text>
+                </View>
+                {totals.map(({ player, total }) => {
+                  const net = total * (n - 1) - (totalSum - total);
+                  const amount = Math.round(net * rate);
+                  return (
+                    <View key={player.id} style={styles.rateResultRow}>
+                      <Text style={[styles.rateResultCell, styles.rateResultName]}>{player.name}</Text>
+                      <Text style={[styles.rateResultCell, styles.rateResultGold]}>{total}pt →</Text>
+                      <Text style={[styles.rateResultCell, net >= 0 ? styles.settlementPositive : styles.settlementNegative]}>
+                        {net >= 0 ? `+${net}pt` : `${net}pt`} →
+                      </Text>
+                      <Text style={[styles.rateResultCell, amount >= 0 ? styles.settlementPositive : styles.settlementNegative]}>
+                        {amount >= 0 ? `+${amount.toLocaleString()}` : amount.toLocaleString()}円
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
           </View>
-          {rate > 0 && (
-            <View style={styles.settlementList}>
-              {settlements.map(({ player, net, amount }) => (
-                <View key={player.id} style={styles.settlementRow}>
-                  <Text style={styles.settlementName}>{player.name}</Text>
-                  <Text
-                    style={[
-                      styles.settlementAmount,
-                      amount >= 0 ? styles.settlementPositive : styles.settlementNegative,
-                    ]}
-                  >
-                    {amount >= 0 ? `+${amount.toLocaleString()}` : amount.toLocaleString()}円
-                  </Text>
-                </View>
-              ))}
-              <Text style={styles.settlementNote}>
-                ※ 平均点を基準とした差分で計算
-              </Text>
-            </View>
-          )}
-        </View>
 
-        {/* Hole-by-hole Details */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>ホール別詳細</Text>
-          {holeResults.map((hole) => {
-            const isExpanded = expandedHoles.has(hole.holeNumber);
-            const hasData = players.some((p) => calcHolePoints(p.id, hole, pointConfig) > 0);
-            return (
-              <TouchableOpacity
-                key={hole.holeNumber}
-                onPress={() => toggleHoleExpand(hole.holeNumber)}
-                activeOpacity={0.7}
-                style={styles.holeRow}
-              >
-                <View style={styles.holeRowHeader}>
-                  <Text style={styles.holeRowLabel}>
-                    {holeLabel(hole)}
-                  </Text>
-                  {hasData && (
-                    <Text style={styles.holeRowSummary}>
-                      {players
-                        .filter((p) => calcHolePoints(p.id, hole, pointConfig) > 0)
-                        .map((p) => p.name)
-                        .join(', ')}
-                    </Text>
-                  )}
-                  {!hasData && <Text style={styles.holeRowEmpty}>-</Text>}
-                  <Text style={styles.holeRowChevron}>{isExpanded ? '▲' : '▼'}</Text>
-                </View>
-                {isExpanded && (
-                  <View style={styles.holeDetail}>
-                    {players.map((p) => {
-                      const pts = calcHolePoints(p.id, hole, pointConfig);
-                      return (
-                        <View key={p.id} style={styles.holeDetailRow}>
-                          <Text style={styles.holeDetailName}>{p.name}</Text>
-                          <Text
-                            style={[
-                              styles.holeDetailPts,
-                              pts > 0 && styles.holeDetailPtsPositive,
-                            ]}
-                          >
-                            {holePointSummary(hole, p.id, pointConfig)}
-                          </Text>
-                        </View>
-                      );
-                    })}
-                  </View>
-                )}
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+          {/* Action Buttons */}
+          <TouchableOpacity style={styles.editBtn} onPress={handleEditScores} activeOpacity={0.7}>
+            <Text style={styles.editBtnText}>✏️ スコアを修正する</Text>
+          </TouchableOpacity>
 
-        {/* Action Buttons */}
-        <TouchableOpacity style={styles.editBtn} onPress={handleEditScores} activeOpacity={0.7}>
-          <Text style={styles.editBtnText}>✏️ スコアを修正する</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.newGameBtn} onPress={handleNewGame} activeOpacity={0.7}>
-          <Text style={styles.newGameBtnText}>🔄 新しいゲームを始める</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
+          <TouchableOpacity style={styles.newGameBtn} onPress={handleNewGame} activeOpacity={0.7}>
+            <Text style={styles.newGameBtnText}>🔄 新しいゲームを始める</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  gradient: {
+    flex: 1,
+  },
   safe: {
     flex: 1,
-    backgroundColor: Colors.bg,
   },
   container: {
     padding: 16,
     paddingBottom: 40,
     gap: 14,
   },
-  title: {
-    fontSize: 24,
+  appHeader: {
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  appTitle: {
+    fontSize: 22,
     fontWeight: 'bold',
     color: Colors.gold,
-    textAlign: 'center',
-    marginTop: 8,
-    marginBottom: 4,
+    letterSpacing: 4,
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  appSub: {
+    fontSize: 10,
+    color: 'rgba(255,255,255,0.85)',
+    letterSpacing: 6,
+    marginTop: 4,
   },
   card: {
-    backgroundColor: Colors.bgCardSolid,
-    borderRadius: 14,
+    backgroundColor: 'rgba(2,10,20,0.82)',
+    borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: 'rgba(255,255,255,0.14)',
     gap: 10,
   },
   cardTitle: {
     fontSize: 12,
-    color: Colors.whiteMuted,
+    color: Colors.gold,
     textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 4,
+    letterSpacing: 2,
+    fontWeight: '600',
+    marginBottom: 2,
   },
   rankRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: 'rgba(255,255,255,0.08)',
     gap: 10,
   },
   rankRowFirst: {
-    backgroundColor: 'rgba(245,166,35,0.08)',
+    backgroundColor: 'rgba(245,166,35,0.1)',
     borderRadius: 10,
     paddingHorizontal: 8,
+    borderBottomWidth: 0,
+    marginBottom: 4,
   },
   rankEmoji: {
     fontSize: 22,
@@ -265,7 +317,7 @@ const styles = StyleSheet.create({
   rankName: {
     flex: 1,
     fontSize: 16,
-    color: Colors.white,
+    color: 'rgba(255,255,255,0.85)',
     fontWeight: '600',
   },
   rankNameFirst: {
@@ -274,55 +326,77 @@ const styles = StyleSheet.create({
   },
   rankTotal: {
     fontSize: 18,
-    color: Colors.white,
+    color: 'rgba(255,255,255,0.85)',
     fontWeight: '700',
   },
   rankTotalFirst: {
     color: Colors.gold,
     fontSize: 22,
   },
-  rateInputRow: {
+  holeDetailToggle: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'space-between',
   },
-  rateLabel: {
-    fontSize: 13,
-    color: Colors.whiteMuted,
-    flex: 1,
+  toggleChevron: {
+    fontSize: 12,
+    color: Colors.gold,
   },
-  rateInput: {
-    width: 80,
-    height: 38,
-    backgroundColor: 'rgba(255,255,255,0.07)',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    color: Colors.white,
-    fontSize: 15,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    textAlign: 'right',
+  tableScroll: {
+    marginTop: 8,
   },
-  rateCurrency: {
-    fontSize: 13,
-    color: Colors.whiteMuted,
+  tableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.06)',
+    paddingVertical: 6,
   },
-  settlementList: {
-    gap: 8,
-    marginTop: 4,
+  tableRowActive: {
+    backgroundColor: 'rgba(245,166,35,0.06)',
+  },
+  tableCell: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.5)',
+    textAlign: 'center',
+    paddingHorizontal: 4,
+  },
+  tableCellH: {
+    width: 30,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.6)',
+  },
+  tableCellHActive: {
+    color: Colors.gold,
+  },
+  tableCellPlayer: {
+    minWidth: 90,
+    fontSize: 11,
+  },
+  tableCellPositive: {
+    color: Colors.gold,
+  },
+  settlementFormula: {
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.4)',
+    marginBottom: 4,
   },
   settlementRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.06)',
   },
   settlementName: {
-    fontSize: 14,
-    color: Colors.white,
+    fontSize: 15,
+    color: 'rgba(255,255,255,0.85)',
+    fontWeight: '600',
   },
-  settlementAmount: {
-    fontSize: 16,
-    fontWeight: 'bold',
+  settlementNet: {
+    fontSize: 15,
+    color: 'rgba(255,255,255,0.5)',
+    fontWeight: '600',
   },
   settlementPositive: {
     color: Colors.success,
@@ -330,78 +404,79 @@ const styles = StyleSheet.create({
   settlementNegative: {
     color: Colors.danger,
   },
-  settlementNote: {
-    fontSize: 11,
-    color: Colors.whiteMuted,
-    marginTop: 6,
+  rateInputRow: {
+    marginBottom: 8,
   },
-  holeRow: {
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-    paddingVertical: 10,
+  rateLabel: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.6)',
   },
-  holeRowHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  rateInput: {
+    height: 44,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    color: Colors.white,
+    fontSize: 17,
+    borderWidth: 1,
+    borderColor: 'rgba(245,166,35,0.3)',
   },
-  holeRowLabel: {
-    fontSize: 14,
-    color: Colors.whiteMuted,
-    width: 48,
-    fontWeight: '600',
-  },
-  holeRowSummary: {
-    flex: 1,
-    fontSize: 12,
-    color: Colors.gold,
-  },
-  holeRowEmpty: {
-    flex: 1,
-    fontSize: 12,
-    color: Colors.whiteMuted,
-  },
-  holeRowChevron: {
-    fontSize: 11,
-    color: Colors.whiteMuted,
-  },
-  holeDetail: {
+  rateResultList: {
     marginTop: 8,
-    paddingLeft: 8,
-    gap: 6,
+    gap: 4,
   },
-  holeDetailRow: {
+  rateResultHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.1)',
+    marginBottom: 4,
   },
-  holeDetailName: {
+  rateResultRow: {
+    flexDirection: 'row',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.06)',
+    alignItems: 'center',
+  },
+  rateResultCell: {
+    flex: 1,
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.5)',
+    textAlign: 'center',
+  },
+  rateResultName: {
+    flex: 1.2,
+    textAlign: 'left',
     fontSize: 13,
-    color: Colors.whiteMuted,
+    color: 'rgba(255,255,255,0.8)',
   },
-  holeDetailPts: {
-    fontSize: 13,
-    color: Colors.whiteMuted,
-  },
-  holeDetailPtsPositive: {
+  rateResultGold: {
     color: Colors.gold,
   },
   editBtn: {
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 14,
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.06)',
   },
   editBtnText: {
     fontSize: 15,
-    color: Colors.whiteMuted,
+    color: 'rgba(255,255,255,0.8)',
     fontWeight: '600',
   },
   newGameBtn: {
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 14,
     alignItems: 'center',
     backgroundColor: Colors.gold,
+    shadowColor: Colors.gold,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
   newGameBtnText: {
     fontSize: 15,
