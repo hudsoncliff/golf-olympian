@@ -146,9 +146,11 @@ export default function HoleInputScreen({ navigation, route }: Props) {
     setShareDialogVisible(true);
   };
 
+  const shareURL = roomCode ? `https://hudsoncliff.github.io/golf-olympian/#${roomCode}` : '';
+
   const handleShareAction = async () => {
     try {
-      await Share.share({ message: `Golf Olympics ルームコード: ${roomCode}` });
+      await Share.share({ message: shareURL, url: shareURL });
     } catch {
       // ignore
     }
@@ -242,8 +244,6 @@ export default function HoleInputScreen({ navigation, route }: Props) {
                               takenByOther && styles.medalBtnTextMuted,
                             ]}
                             numberOfLines={1}
-                            adjustsFontSizeToFit
-                            minimumFontScale={0.7}
                           >
                             {cfg.label}
                           </Text>
@@ -261,7 +261,7 @@ export default function HoleInputScreen({ navigation, route }: Props) {
                     onPress={() => toggleDiamond(player.id)}
                     activeOpacity={0.7}
                   >
-                    <Text style={[styles.specialBtnText, hasDiamond && { color: Colors.diamond }]}>
+                    <Text style={[styles.specialBtnText, hasDiamond && { color: Colors.diamond }]} numberOfLines={1}>
                       💎 ダイヤモンド
                     </Text>
                   </TouchableOpacity>
@@ -271,7 +271,7 @@ export default function HoleInputScreen({ navigation, route }: Props) {
                     onPress={() => toggleSaoichi(player.id)}
                     activeOpacity={0.7}
                   >
-                    <Text style={[styles.specialBtnText, hasSaoichi && { color: Colors.saoichi }]}>
+                    <Text style={[styles.specialBtnText, hasSaoichi && { color: Colors.saoichi }]} numberOfLines={1}>
                       🚩 竿イチ権
                     </Text>
                   </TouchableOpacity>
@@ -281,7 +281,7 @@ export default function HoleInputScreen({ navigation, route }: Props) {
                     onPress={() => toggleNeapin(player.id)}
                     activeOpacity={0.7}
                   >
-                    <Text style={[styles.specialBtnText, hasNeapin && { color: Colors.neapin }]}>
+                    <Text style={[styles.specialBtnText, hasNeapin && { color: Colors.neapin }]} numberOfLines={1}>
                       📍 ニアピン
                     </Text>
                   </TouchableOpacity>
@@ -294,7 +294,7 @@ export default function HoleInputScreen({ navigation, route }: Props) {
                     onPress={() => toggleBirdie(player.id)}
                     activeOpacity={0.7}
                   >
-                    <Text style={[styles.specialBtnText, hasBirdie && { color: Colors.birdie }]}>
+                    <Text style={[styles.specialBtnText, hasBirdie && { color: Colors.birdie }]} numberOfLines={1}>
                       🐦 バーディ
                     </Text>
                   </TouchableOpacity>
@@ -355,12 +355,12 @@ export default function HoleInputScreen({ navigation, route }: Props) {
         >
           <View style={styles.shareModalOverlay}>
             <View style={styles.shareModalBox}>
-              <Text style={styles.shareModalTitle}>👤 参加者に共有する</Text>
+              <Text style={styles.shareModalTitle}>📱 参加者に共有する</Text>
               <Text style={styles.roomCodeLabel}>ルームコード</Text>
               <Text style={styles.roomCodeText}>{roomCode}</Text>
               <View style={styles.qrContainer}>
                 <QRCode
-                  value={roomCode || 'GOLF'}
+                  value={shareURL || 'https://hudsoncliff.github.io/golf-olympian/'}
                   size={160}
                   color="#0d1a2e"
                   backgroundColor="white"
@@ -559,12 +559,14 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   specialBtn: {
+    flex: 1,
     paddingVertical: 9,
-    paddingHorizontal: 13,
+    paddingHorizontal: 6,
     borderRadius: 9,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.12)',
     backgroundColor: 'rgba(255,255,255,0.04)',
+    alignItems: 'center',
   },
   specialBtnActiveDiamond: {
     borderColor: Colors.diamond,
@@ -586,6 +588,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: 'rgba(255,255,255,0.4)',
     fontWeight: '600',
+    textAlign: 'center',
   },
   ptsIndicator: {
     alignSelf: 'flex-start',
