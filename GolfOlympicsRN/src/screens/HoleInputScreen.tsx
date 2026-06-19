@@ -43,6 +43,7 @@ export default function HoleInputScreen({ navigation, route }: Props) {
   const [currentHole, setCurrentHole] = useState(1);
   const [, forceUpdate] = useState(0);
   const [quitDialogVisible, setQuitDialogVisible] = useState(false);
+  const [shareDialogVisible, setShareDialogVisible] = useState(false);
 
   const refresh = useCallback(() => forceUpdate((n) => n + 1), []);
 
@@ -115,14 +116,6 @@ export default function HoleInputScreen({ navigation, route }: Props) {
     refresh();
   };
 
-  const toggleShort = () => {
-    const h = holeResultsRef.current[currentHole - 1];
-    const isShort = !h.isShort;
-    const neapin = isShort ? h.neapin : null;
-    holeResultsRef.current[currentHole - 1] = { ...h, isShort, neapin };
-    refresh();
-  };
-
   const handleBack = () => {
     if (currentHole === 1) {
       navigation.goBack();
@@ -171,9 +164,14 @@ export default function HoleInputScreen({ navigation, route }: Props) {
               <Text style={styles.holeTotal}>{currentHole} / {TOTAL_HOLES}</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.quitBtn} onPress={handleQuit} activeOpacity={0.7}>
-            <Text style={styles.quitBtnText}>✕ ゲームを中止</Text>
-          </TouchableOpacity>
+          <View style={styles.headerRight}>
+            <TouchableOpacity style={styles.shareBtn} onPress={() => setShareDialogVisible(true)} activeOpacity={0.7}>
+              <Text style={styles.shareBtnText}>共有</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.quitBtn} onPress={handleQuit} activeOpacity={0.7}>
+              <Text style={styles.quitBtnText}>✕</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Progress Bar */}
@@ -182,18 +180,7 @@ export default function HoleInputScreen({ navigation, route }: Props) {
         </View>
 
         <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-          {/* Short Hole Toggle */}
-          <TouchableOpacity
-            style={[styles.shortToggle, hole.isShort && styles.shortToggleActive]}
-            onPress={toggleShort}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.shortToggleText, hole.isShort && styles.shortToggleTextActive]}>
-              ★ ショートホール {hole.isShort ? 'ON' : 'OFF'}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Player Rows */}
+            {/* Player Rows */}
           {players.map((player) => {
             const pts = calcHolePoints(player.id, hole, pointConfig);
             const hasDiamond = !!hole.diamonds[player.id];
@@ -236,6 +223,9 @@ export default function HoleInputScreen({ navigation, route }: Props) {
                               isActive && { color: cfg.color },
                               takenByOther && styles.medalBtnTextMuted,
                             ]}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.7}
                           >
                             {cfg.label}
                           </Text>
@@ -268,17 +258,15 @@ export default function HoleInputScreen({ navigation, route }: Props) {
                     </Text>
                   </TouchableOpacity>
 
-                  {hole.isShort && (
-                    <TouchableOpacity
-                      style={[styles.specialBtn, hasNeapin && styles.specialBtnActiveNeapin]}
-                      onPress={() => toggleNeapin(player.id)}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={[styles.specialBtnText, hasNeapin && { color: Colors.neapin }]}>
-                        📍 ニアピン
-                      </Text>
-                    </TouchableOpacity>
-                  )}
+                  <TouchableOpacity
+                    style={[styles.specialBtn, hasNeapin && styles.specialBtnActiveNeapin]}
+                    onPress={() => toggleNeapin(player.id)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[styles.specialBtnText, hasNeapin && { color: Colors.neapin }]}>
+                      📍 ニアピン
+                    </Text>
+                  </TouchableOpacity>
                 </View>
 
                 {/* Special Options Row 2: Birdie */}
@@ -339,6 +327,28 @@ export default function HoleInputScreen({ navigation, route }: Props) {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* Share Dialog (placeholder — modal design TBD) */}
+        <Modal
+          visible={shareDialogVisible}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShareDialogVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalBox}>
+              <Text style={styles.modalTitle}>スコアを共有</Text>
+              <Text style={styles.modalBody}>（共有機能は近日実装予定）</Text>
+              <TouchableOpacity
+                style={styles.modalCancelBtn}
+                onPress={() => setShareDialogVisible(false)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.modalCancelText}>閉じる</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
 
         {/* Quit Confirmation Dialog */}
         <Modal
@@ -410,16 +420,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'rgba(255,255,255,0.6)',
   },
-  quitBtn: {
-    paddingHorizontal: 12,
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  shareBtn: {
+    paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 10,
+    backgroundColor: 'rgba(245,166,35,0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(245,166,35,0.4)',
+  },
+  shareBtnText: {
+    fontSize: 13,
+    color: Colors.gold,
+    fontWeight: '600',
+  },
+  quitBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: 'rgba(255,138,138,0.15)',
     borderWidth: 1,
     borderColor: 'rgba(255,138,138,0.3)',
   },
   quitBtnText: {
-    fontSize: 13,
+    fontSize: 15,
     color: Colors.danger,
     fontWeight: '600',
   },
@@ -442,26 +472,6 @@ const styles = StyleSheet.create({
     padding: 12,
     paddingBottom: 20,
     gap: 10,
-  },
-  shortToggle: {
-    borderRadius: 10,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.2)',
-    paddingVertical: 10,
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.2)',
-  },
-  shortToggleActive: {
-    borderColor: Colors.gold,
-    backgroundColor: 'rgba(245,166,35,0.15)',
-  },
-  shortToggleText: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.6)',
-    fontWeight: '600',
-  },
-  shortToggleTextActive: {
-    color: Colors.gold,
   },
   playerCard: {
     backgroundColor: 'rgba(2,10,20,0.82)',
