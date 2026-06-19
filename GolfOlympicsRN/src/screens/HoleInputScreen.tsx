@@ -7,7 +7,9 @@ import {
   StyleSheet,
   SafeAreaView,
   Modal,
+  Share,
 } from 'react-native';
+import QRCode from 'react-native-qrcode-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
@@ -44,6 +46,7 @@ export default function HoleInputScreen({ navigation, route }: Props) {
   const [, forceUpdate] = useState(0);
   const [quitDialogVisible, setQuitDialogVisible] = useState(false);
   const [shareDialogVisible, setShareDialogVisible] = useState(false);
+  const [roomCode, setRoomCode] = useState('');
 
   const refresh = useCallback(() => forceUpdate((n) => n + 1), []);
 
@@ -136,6 +139,21 @@ export default function HoleInputScreen({ navigation, route }: Props) {
     }
   };
 
+  const handleShareOpen = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const code = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    setRoomCode(code);
+    setShareDialogVisible(true);
+  };
+
+  const handleShareAction = async () => {
+    try {
+      await Share.share({ message: `Golf Olympics ルームコード: ${roomCode}` });
+    } catch {
+      // ignore
+    }
+  };
+
   const handleQuit = () => {
     setQuitDialogVisible(true);
   };
@@ -165,7 +183,7 @@ export default function HoleInputScreen({ navigation, route }: Props) {
             </View>
           </View>
           <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.shareBtn} onPress={() => setShareDialogVisible(true)} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.shareBtn} onPress={handleShareOpen} activeOpacity={0.7}>
               <Text style={styles.shareBtnText}>共有</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.quitBtn} onPress={handleQuit} activeOpacity={0.7}>
@@ -328,23 +346,42 @@ export default function HoleInputScreen({ navigation, route }: Props) {
           </TouchableOpacity>
         </View>
 
-        {/* Share Dialog (placeholder — modal design TBD) */}
+        {/* Share Dialog */}
         <Modal
           visible={shareDialogVisible}
           transparent
           animationType="slide"
           onRequestClose={() => setShareDialogVisible(false)}
         >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalBox}>
-              <Text style={styles.modalTitle}>スコアを共有</Text>
-              <Text style={styles.modalBody}>（共有機能は近日実装予定）</Text>
+          <View style={styles.shareModalOverlay}>
+            <View style={styles.shareModalBox}>
+              <Text style={styles.shareModalTitle}>👤 参加者に共有する</Text>
+              <Text style={styles.roomCodeLabel}>ルームコード</Text>
+              <Text style={styles.roomCodeText}>{roomCode}</Text>
+              <View style={styles.qrContainer}>
+                <QRCode
+                  value={roomCode || 'GOLF'}
+                  size={160}
+                  color="#0d1a2e"
+                  backgroundColor="white"
+                />
+              </View>
+              <Text style={styles.shareModalCaption}>
+                カメラで読み取るとWebで観戦できます
+              </Text>
               <TouchableOpacity
-                style={styles.modalCancelBtn}
+                style={styles.shareActionBtn}
+                onPress={handleShareAction}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.shareActionBtnText}>⬆ このゲームを共有</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
                 onPress={() => setShareDialogVisible(false)}
                 activeOpacity={0.7}
+                style={styles.shareCloseBtn}
               >
-                <Text style={styles.modalCancelText}>閉じる</Text>
+                <Text style={styles.shareCloseBtnText}>閉じる</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -634,6 +671,75 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#1a0a00',
     fontWeight: 'bold',
+  },
+  shareModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
+  },
+  shareModalBox: {
+    backgroundColor: '#0d1a2e',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 24,
+    paddingHorizontal: 24,
+    paddingBottom: 36,
+    alignItems: 'center',
+    gap: 12,
+  },
+  shareModalTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: Colors.white,
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  roomCodeLabel: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.55)',
+    letterSpacing: 1,
+  },
+  roomCodeText: {
+    fontSize: 40,
+    fontWeight: 'bold',
+    color: Colors.gold,
+    letterSpacing: 8,
+  },
+  qrContainer: {
+    padding: 10,
+    backgroundColor: 'white',
+    borderRadius: 12,
+  },
+  shareModalCaption: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.45)',
+    textAlign: 'center',
+  },
+  shareActionBtn: {
+    width: '100%',
+    backgroundColor: Colors.gold,
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 4,
+    shadowColor: Colors.gold,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  shareActionBtnText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1a0a00',
+  },
+  shareCloseBtn: {
+    paddingVertical: 8,
+  },
+  shareCloseBtnText: {
+    fontSize: 15,
+    color: 'rgba(255,255,255,0.5)',
+    fontWeight: '600',
   },
   modalOverlay: {
     flex: 1,
