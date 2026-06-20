@@ -33,7 +33,9 @@ function emptyHoleResult() {
 
 function normalizeHoleResult(h) {
   if (!h) return emptyHoleResult();
-  if (h.medals !== undefined) return { birdie: {}, ...h };
+  // holeNumber は必ず数値で保存されるため新フォーマットの判定に使う
+  // medals:{} は Firebase が保存しないため medals の有無では判定できない
+  if (h.holeNumber !== undefined) return { medals: {}, birdie: {}, diamonds: {}, saoichi: {}, ...h };
   // legacy flat format: { playerId: medalKey }
   return { medals: { ...h }, diamonds: {}, saoichi: {}, neapin: null, isShort: false, birdie: {} };
 }
