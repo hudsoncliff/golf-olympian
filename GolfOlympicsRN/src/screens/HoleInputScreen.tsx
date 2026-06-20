@@ -206,7 +206,7 @@ export default function HoleInputScreen({ navigation, route }: Props) {
       fetch(`${DB_URL}/rooms/${firebaseRoomIdRef.current}.json`, { method: 'DELETE' }).catch(() => {});
       firebaseRoomIdRef.current = null;
     }
-    navigation.navigate('Start');
+    navigation.navigate('Opening');
   };
 
   const progress = currentHole / TOTAL_HOLES;

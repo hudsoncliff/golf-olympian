@@ -44,6 +44,10 @@ export default function StartScreen({ navigation }: Props) {
       id: `p${i + 1}`,
       name: names[i].trim() || `プレイヤー${i + 1}`,
     }));
+    const firstName = names[0].trim();
+    if (firstName) {
+      AsyncStorage.setItem('@golf_last_player_name', firstName).catch(() => {});
+    }
     navigation.navigate('HoleInput', { players, pointConfig });
   };
 

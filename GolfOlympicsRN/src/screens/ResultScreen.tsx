@@ -6,7 +6,6 @@ import {
   ScrollView,
   StyleSheet,
   SafeAreaView,
-  TextInput,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -44,7 +43,6 @@ function holeIconSummary(hole: HoleResult, playerId: string, config: any): strin
 
 export default function ResultScreen({ navigation, route }: Props) {
   const { players, holeResults, pointConfig } = route.params;
-  const [rateText, setRateText] = useState('');
   const [holeDetailOpen, setHoleDetailOpen] = useState(false);
 
   const totals = players.map((p) => ({
@@ -53,30 +51,20 @@ export default function ResultScreen({ navigation, route }: Props) {
   }));
   const sorted = [...totals].sort((a, b) => b.total - a.total);
 
-  // Assign ranks (handle ties)
-  const rankedSorted = sorted.map((item, idx) => {
+  const rankedSorted = sorted.map((item) => {
     const rank = sorted.findIndex((s) => s.total === item.total);
     return { ...item, rank };
   });
 
-  const rate = parseFloat(rateText) || 0;
   const n = players.length;
   const totalSum = totals.reduce((s, t) => s + t.total, 0);
-  const avg = totalSum / n;
 
-  const settlements = totals.map(({ player, total }) => ({
-    player,
-    total,
-    net: total - avg,
-    amount: Math.round((total - avg) * rate),
-  }));
+  const handleRateCalc = () => {
+    navigation.navigate('RateCalc', { players, holeResults, pointConfig });
+  };
 
   const handleEditScores = () => {
     navigation.navigate('HoleInput', { players, pointConfig });
-  };
-
-  const handleNewGame = () => {
-    navigation.navigate('Start');
   };
 
   return (
@@ -191,55 +179,13 @@ export default function ResultScreen({ navigation, route }: Props) {
             })}
           </View>
 
-          {/* Rate Calculation */}
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>💴 レート計算・集計</Text>
-            <View style={styles.rateInputRow}>
-              <Text style={styles.rateLabel}>1ポイントあたりのレート（円）</Text>
-            </View>
-            <TextInput
-              style={styles.rateInput}
-              value={rateText}
-              onChangeText={setRateText}
-              keyboardType="numeric"
-              placeholder="100"
-              placeholderTextColor={Colors.whiteMuted}
-            />
-            {rate > 0 && (
-              <View style={styles.rateResultList}>
-                <View style={styles.rateResultHeader}>
-                  <Text style={[styles.rateResultCell, styles.rateResultName]}></Text>
-                  <Text style={styles.rateResultCell}>獲得pt</Text>
-                  <Text style={styles.rateResultCell}>精算pt</Text>
-                  <Text style={styles.rateResultCell}>精算額(円)</Text>
-                </View>
-                {totals.map(({ player, total }) => {
-                  const net = total * (n - 1) - (totalSum - total);
-                  const amount = Math.round(net * rate);
-                  return (
-                    <View key={player.id} style={styles.rateResultRow}>
-                      <Text style={[styles.rateResultCell, styles.rateResultName]}>{player.name}</Text>
-                      <Text style={[styles.rateResultCell, styles.rateResultGold]}>{total}pt →</Text>
-                      <Text style={[styles.rateResultCell, net >= 0 ? styles.settlementPositive : styles.settlementNegative]}>
-                        {net >= 0 ? `+${net}pt` : `${net}pt`} →
-                      </Text>
-                      <Text style={[styles.rateResultCell, amount >= 0 ? styles.settlementPositive : styles.settlementNegative]}>
-                        {amount >= 0 ? `+${amount.toLocaleString()}` : amount.toLocaleString()}円
-                      </Text>
-                    </View>
-                  );
-                })}
-              </View>
-            )}
-          </View>
-
           {/* Action Buttons */}
-          <TouchableOpacity style={styles.editBtn} onPress={handleEditScores} activeOpacity={0.7}>
-            <Text style={styles.editBtnText}>✏️ スコアを修正する</Text>
+          <TouchableOpacity style={styles.rateCalcBtn} onPress={handleRateCalc} activeOpacity={0.8}>
+            <Text style={styles.rateCalcBtnText}>💴 レート計算・集計</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.newGameBtn} onPress={handleNewGame} activeOpacity={0.7}>
-            <Text style={styles.newGameBtnText}>🔄 新しいゲームを始める</Text>
+          <TouchableOpacity style={styles.editBtn} onPress={handleEditScores} activeOpacity={0.7}>
+            <Text style={styles.editBtnText}>✏️ スコアを修正する</Text>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
@@ -404,55 +350,21 @@ const styles = StyleSheet.create({
   settlementNegative: {
     color: Colors.danger,
   },
-  rateInputRow: {
-    marginBottom: 8,
-  },
-  rateLabel: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.6)',
-  },
-  rateInput: {
-    height: 44,
-    backgroundColor: 'rgba(255,255,255,0.07)',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    color: Colors.white,
-    fontSize: 17,
-    borderWidth: 1,
-    borderColor: 'rgba(245,166,35,0.3)',
-  },
-  rateResultList: {
-    marginTop: 8,
-    gap: 4,
-  },
-  rateResultHeader: {
-    flexDirection: 'row',
-    paddingVertical: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
-    marginBottom: 4,
-  },
-  rateResultRow: {
-    flexDirection: 'row',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.06)',
+  rateCalcBtn: {
+    paddingVertical: 16,
+    borderRadius: 14,
     alignItems: 'center',
+    backgroundColor: Colors.gold,
+    shadowColor: Colors.gold,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
-  rateResultCell: {
-    flex: 1,
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.5)',
-    textAlign: 'center',
-  },
-  rateResultName: {
-    flex: 1.2,
-    textAlign: 'left',
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.8)',
-  },
-  rateResultGold: {
-    color: Colors.gold,
+  rateCalcBtnText: {
+    fontSize: 16,
+    color: '#1a0a00',
+    fontWeight: 'bold',
   },
   editBtn: {
     paddingVertical: 14,
@@ -466,21 +378,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: 'rgba(255,255,255,0.8)',
     fontWeight: '600',
-  },
-  newGameBtn: {
-    paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: 'center',
-    backgroundColor: Colors.gold,
-    shadowColor: Colors.gold,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  newGameBtnText: {
-    fontSize: 15,
-    color: '#1a0a00',
-    fontWeight: 'bold',
   },
 });
