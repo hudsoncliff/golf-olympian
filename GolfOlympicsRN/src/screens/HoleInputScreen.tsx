@@ -41,12 +41,40 @@ export default function HoleInputScreen({ navigation, route }: Props) {
   const holeResultsRef = useRef<HoleResult[]>(
     Array.from({ length: TOTAL_HOLES }, (_, i) => emptyHoleResult(i + 1)),
   );
+  const firebaseRoomIdRef = useRef<string | null>(null);
 
   const [currentHole, setCurrentHole] = useState(1);
   const [, forceUpdate] = useState(0);
   const [quitDialogVisible, setQuitDialogVisible] = useState(false);
   const [shareDialogVisible, setShareDialogVisible] = useState(false);
   const [roomCode, setRoomCode] = useState('');
+
+  const DB_URL = 'https://golfonigiri-46bfa-default-rtdb.asia-southeast1.firebasedatabase.app';
+
+  const pushToFirebase = async (roomId: string, holeNum: number, status: 'playing' | 'finished' = 'playing') => {
+    const data = {
+      players: players.map(p => ({ id: p.id, name: p.name })),
+      holeResults: holeResultsRef.current.map(h => ({
+        holeNumber: h.holeNumber,
+        medals: h.medals,
+        diamonds: h.diamonds,
+        saoichi: h.saoichi,
+        neapin: h.neapin,
+        birdie: h.birdie,
+      })),
+      currentHole: holeNum,
+      status,
+    };
+    try {
+      await fetch(`${DB_URL}/rooms/${roomId}.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+    } catch {
+      // ignore network errors
+    }
+  };
 
   const refresh = useCallback(() => forceUpdate((n) => n + 1), []);
 
@@ -129,20 +157,32 @@ export default function HoleInputScreen({ navigation, route }: Props) {
 
   const handleNext = () => {
     if (currentHole === TOTAL_HOLES) {
+      if (firebaseRoomIdRef.current) {
+        pushToFirebase(firebaseRoomIdRef.current, currentHole, 'finished');
+      }
       navigation.navigate('Result', {
         players,
         holeResults: holeResultsRef.current,
         pointConfig,
       });
     } else {
-      setCurrentHole(currentHole + 1);
+      const nextHole = currentHole + 1;
+      setCurrentHole(nextHole);
+      if (firebaseRoomIdRef.current) {
+        pushToFirebase(firebaseRoomIdRef.current, nextHole);
+      }
     }
   };
 
   const handleShareOpen = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    const code = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    let code = firebaseRoomIdRef.current;
+    if (!code) {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      code = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+      firebaseRoomIdRef.current = code;
+    }
     setRoomCode(code);
+    pushToFirebase(code, currentHole);
     setShareDialogVisible(true);
   };
 
@@ -162,6 +202,10 @@ export default function HoleInputScreen({ navigation, route }: Props) {
 
   const confirmQuit = () => {
     setQuitDialogVisible(false);
+    if (firebaseRoomIdRef.current) {
+      fetch(`${DB_URL}/rooms/${firebaseRoomIdRef.current}.json`, { method: 'DELETE' }).catch(() => {});
+      firebaseRoomIdRef.current = null;
+    }
     navigation.navigate('Start');
   };
 
