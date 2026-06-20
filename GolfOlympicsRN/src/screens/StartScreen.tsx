@@ -41,7 +41,7 @@ export default function StartScreen({ navigation }: Props) {
 
   const handleStart = () => {
     const players: Player[] = Array.from({ length: playerCount }, (_, i) => ({
-      id: String(i + 1),
+      id: `p${i + 1}`,
       name: names[i].trim() || `プレイヤー${i + 1}`,
     }));
     navigation.navigate('HoleInput', { players, pointConfig });
