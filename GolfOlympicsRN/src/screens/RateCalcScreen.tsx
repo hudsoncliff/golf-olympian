@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { Colors } from '../theme/colors';
 import { calcTotalPoints } from '../models/types';
@@ -25,6 +26,17 @@ type Props = {
 export default function RateCalcScreen({ navigation, route }: Props) {
   const { players, holeResults, pointConfig } = route.params;
   const [rateText, setRateText] = useState('100');
+  const [currency, setCurrency] = useState('円');
+
+  useEffect(() => {
+    Promise.all([
+      AsyncStorage.getItem('@golf_default_rate'),
+      AsyncStorage.getItem('@golf_currency'),
+    ]).then(([rate, cur]) => {
+      if (rate) setRateText(rate);
+      if (cur && cur.trim()) setCurrency(cur.trim());
+    });
+  }, []);
 
   const totals = players.map((p) => ({
     player: p,
@@ -87,7 +99,7 @@ export default function RateCalcScreen({ navigation, route }: Props) {
                 <Text style={[styles.tableCell, styles.cellName]} />
                 <Text style={[styles.tableCell, styles.cellPt]}>獲得pt</Text>
                 <Text style={[styles.tableCell, styles.cellNet]}>精算pt</Text>
-                <Text style={[styles.tableCell, styles.cellAmount]}>精算額(円)</Text>
+                <Text style={[styles.tableCell, styles.cellAmount]}>精算額({currency})</Text>
               </View>
               {rows.map(({ player, total, net, amount }) => (
                 <View key={player.id} style={styles.tableRow}>
@@ -115,8 +127,8 @@ export default function RateCalcScreen({ navigation, route }: Props) {
                   >
                     {rate > 0
                       ? amount >= 0
-                        ? `+${amount.toLocaleString()}円`
-                        : `${amount.toLocaleString()}円`
+                        ? `+${amount.toLocaleString()}${currency}`
+                        : `${amount.toLocaleString()}${currency}`
                       : '—'}
                   </Text>
                 </View>
