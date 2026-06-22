@@ -1,8 +1,8 @@
 export const MEDAL_CONFIG = {
-  gold:   { label: '🥇 金',  points: 4, color: '#F5A623' },
-  silver: { label: '🥈 銀',  points: 3, color: '#9B9B9B' },
-  bronze: { label: '🥉 銅',  points: 2, color: '#C47B2B' },
-  iron:   { label: '🪨 鉄',  points: 1, color: '#607D8B' },
+  gold:   { emoji: '🥇', name: '金', label: '🥇 金',  points: 4, color: '#F5A623' },
+  silver: { emoji: '🥈', name: '銀', label: '🥈 銀',  points: 3, color: '#9B9B9B' },
+  bronze: { emoji: '🥉', name: '銅', label: '🥉 銅',  points: 2, color: '#C47B2B' },
+  iron:   { emoji: '🪨', name: '鉄', label: '🪨 鉄',  points: 1, color: '#607D8B' },
 } as const;
 
 export type MedalKey = keyof typeof MEDAL_CONFIG;

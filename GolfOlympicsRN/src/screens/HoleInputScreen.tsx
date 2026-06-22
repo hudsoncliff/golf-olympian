@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   Modal,
   Share,
+  Animated,
 } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -48,6 +49,9 @@ export default function HoleInputScreen({ navigation, route }: Props) {
   const [quitDialogVisible, setQuitDialogVisible] = useState(false);
   const [shareDialogVisible, setShareDialogVisible] = useState(false);
   const [roomCode, setRoomCode] = useState('');
+  const [transitionHole, setTransitionHole] = useState<number | null>(null);
+  const holeTransitionAnim = useRef(new Animated.Value(0)).current;
+  const holeTransitionScale = useRef(new Animated.Value(0.7)).current;
 
   const DB_URL = 'https://golfonigiri-46bfa-default-rtdb.asia-southeast1.firebasedatabase.app';
 
@@ -167,10 +171,23 @@ export default function HoleInputScreen({ navigation, route }: Props) {
       });
     } else {
       const nextHole = currentHole + 1;
-      setCurrentHole(nextHole);
-      if (firebaseRoomIdRef.current) {
-        pushToFirebase(firebaseRoomIdRef.current, nextHole);
-      }
+      setTransitionHole(nextHole);
+      holeTransitionAnim.setValue(0);
+      holeTransitionScale.setValue(0.7);
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(holeTransitionAnim, { toValue: 1, duration: 250, useNativeDriver: true }),
+          Animated.timing(holeTransitionScale, { toValue: 1, duration: 250, useNativeDriver: true }),
+        ]),
+        Animated.delay(600),
+        Animated.timing(holeTransitionAnim, { toValue: 0, duration: 250, useNativeDriver: true }),
+      ]).start(() => {
+        setCurrentHole(nextHole);
+        setTransitionHole(null);
+        if (firebaseRoomIdRef.current) {
+          pushToFirebase(firebaseRoomIdRef.current, nextHole);
+        }
+      });
     }
   };
 
@@ -213,6 +230,7 @@ export default function HoleInputScreen({ navigation, route }: Props) {
   const isLastHole = currentHole === TOTAL_HOLES;
 
   return (
+    <>
     <LinearGradient
       colors={['#59B2E0', '#2079B7', '#1A8048', '#07471F']}
       locations={[0, 0.2, 0.6, 1]}
@@ -281,15 +299,16 @@ export default function HoleInputScreen({ navigation, route }: Props) {
                           onPress={() => toggleMedal(player.id, medal)}
                           activeOpacity={0.7}
                         >
+                          <Text style={styles.medalBtnEmoji} numberOfLines={1}>{cfg.emoji}</Text>
                           <Text
                             style={[
-                              styles.medalBtnText,
+                              styles.medalBtnName,
                               isActive && { color: cfg.color },
                               takenByOther && styles.medalBtnTextMuted,
                             ]}
                             numberOfLines={1}
                           >
-                            {cfg.label}
+                            {cfg.name}
                           </Text>
                         </TouchableOpacity>
                       );
@@ -458,7 +477,26 @@ export default function HoleInputScreen({ navigation, route }: Props) {
           </View>
         </Modal>
       </SafeAreaView>
+
     </LinearGradient>
+
+      <Modal
+        visible={transitionHole !== null}
+        transparent
+        animationType="none"
+        statusBarTranslucent
+      >
+        <Animated.View
+          pointerEvents="none"
+          style={[styles.holeTransitionOverlay, { opacity: holeTransitionAnim }]}
+        >
+          <Animated.View style={{ transform: [{ scale: holeTransitionScale }], alignItems: 'center' }}>
+            <Text style={styles.holeTransitionLabel}>HOLE</Text>
+            <Text style={styles.holeTransitionNum}>{transitionHole}</Text>
+          </Animated.View>
+        </Animated.View>
+      </Modal>
+    </>
   );
 }
 
@@ -581,8 +619,12 @@ const styles = StyleSheet.create({
   medalBtn: {
     flex: 1,
     paddingVertical: 9,
+    paddingHorizontal: 2,
     borderRadius: 9,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
     borderWidth: 1.5,
     borderColor: 'rgba(255,255,255,0.12)',
     backgroundColor: 'rgba(255,255,255,0.04)',
@@ -590,13 +632,34 @@ const styles = StyleSheet.create({
   medalBtnTaken: {
     opacity: 0.4,
   },
-  medalBtnText: {
+  medalBtnEmoji: {
+    fontSize: 14,
+  },
+  medalBtnName: {
     fontSize: 12,
     color: 'rgba(255,255,255,0.5)',
     fontWeight: '600',
   },
   medalBtnTextMuted: {
     color: 'rgba(255,255,255,0.3)',
+  },
+  holeTransitionOverlay: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,10,20,0.78)',
+  },
+  holeTransitionLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.6)',
+    letterSpacing: 8,
+  },
+  holeTransitionNum: {
+    fontSize: 96,
+    fontWeight: 'bold',
+    color: '#F5A623',
+    lineHeight: 104,
   },
   specialRow: {
     flexDirection: 'row',
