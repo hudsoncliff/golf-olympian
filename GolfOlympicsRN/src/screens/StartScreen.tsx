@@ -28,13 +28,19 @@ export default function StartScreen({ navigation }: Props) {
   const [pointConfig, setPointConfig] = useState<PointConfig>(DEFAULT_POINT_CONFIG);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY_POINT_CONFIG).then((val) => {
-      if (val) {
-        try {
-          setPointConfig(JSON.parse(val));
-        } catch {
-          // ignore
-        }
+    Promise.all([
+      AsyncStorage.getItem(STORAGE_KEY_POINT_CONFIG),
+      AsyncStorage.getItem('@golf_last_player_name'),
+    ]).then(([cfg, savedName]) => {
+      if (cfg) {
+        try { setPointConfig(JSON.parse(cfg)); } catch {}
+      }
+      if (savedName) {
+        setNames((prev) => {
+          const next = [...prev];
+          next[0] = savedName;
+          return next;
+        });
       }
     });
   }, []);
@@ -51,8 +57,8 @@ export default function StartScreen({ navigation }: Props) {
     navigation.navigate('HoleInput', { players, pointConfig });
   };
 
-  const handleSettingsPress = () => {
-    navigation.navigate('Settings');
+  const handleBack = () => {
+    navigation.goBack();
   };
 
   return (
@@ -114,9 +120,9 @@ export default function StartScreen({ navigation }: Props) {
             <Text style={styles.startBtnText}>ゲーム開始 🏌️</Text>
           </TouchableOpacity>
 
-          {/* Settings Button */}
-          <TouchableOpacity style={styles.settingsBtn} onPress={handleSettingsPress} activeOpacity={0.7}>
-            <Text style={styles.settingsBtnText}>⚙️ 設定</Text>
+          {/* Back Button */}
+          <TouchableOpacity style={styles.settingsBtn} onPress={handleBack} activeOpacity={0.7}>
+            <Text style={styles.settingsBtnText}>← 戻る</Text>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
