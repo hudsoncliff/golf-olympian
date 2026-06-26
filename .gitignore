@@ -3,6 +3,7 @@ dist
 *.DS_Store
 .env.local
 *.env
+.env*
 
 # Xcode user-specific
 xcuserdata/

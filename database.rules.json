@@ -1,0 +1,18 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "rooms": {
+      "$roomId": {
+        ".read": true,
+        ".write": true,
+        ".validate": "$roomId.length >= 4 && $roomId.length <= 16",
+        "status": { ".validate": "newData.isString() && newData.val().length <= 20" },
+        "currentHole": { ".validate": "newData.isNumber()" },
+        "players": { ".validate": "newData.hasChildren() || newData.isString()" },
+        "holeResults": { ".validate": true },
+        "$other": { ".validate": false }
+      }
+    }
+  }
+}
