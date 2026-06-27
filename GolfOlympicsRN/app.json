@@ -11,9 +11,12 @@
       "resizeMode": "contain",
       "backgroundColor": "#0a1628"
     },
-    "platforms": ["android"],
+    "platforms": [
+      "android"
+    ],
     "android": {
       "package": "jp.onigiri.golf",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0a1628"
@@ -21,6 +24,11 @@
     },
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "ff5e1d5b-8b99-4ada-9d34-d3839586f7a4"
+      }
+    }
   }
 }
